@@ -1,8 +1,8 @@
 
-Purpose:
+##Purpose:
 “Grade-book” is a Desktop Application that will perform all the mathematical calculations needed to find out the standard deviation, average, and minimum scores for a classroom. It will have more features available such as displaying statistical information on a per student basis and display data on graphs. The backbone data will be stored in an SQL Database. This Desktop Application will be driven by a simple, easy to use, and intuitive UserInterface. 
 
-Meet the Team:
+##Meet the Team:
 
 Darren Reitan is a music teacher from Redding California, winner of the California Arts
 Councils Artist in Residence Grant and California Old Time Fiddlers Association Open State
