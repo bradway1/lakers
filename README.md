@@ -12,3 +12,7 @@ graduate in the spring of 2015.
 
 
 Alejandro Velazquez is double majoring in Computer and Electrical Engineering. He transferred to Chico State in the Fall of 2013 with associate degrees in Mathematics and Computer Science. He is excited to work in a team environment to pursue the same end goal and develop a piece of Software from the ground up. 
+
+Jason Boutte' is majoring in Computer Science. Before transferring to Chico State from Butte College in the 
+Spring of 2014, he worked for Telestream, Inc. as a Quality Assurance Technician/Engineer. He's very excited 
+to contribute to this new project and team.
