@@ -4,4 +4,11 @@ Purpose:
 
 Meet the Team:
 
-Alejandro Velazquez - I am double majoring in Computer and Electrical Engineering. I transferred to Chico State in the Fall of 2013 with associate degrees in Mathematics and Computer Science. I am excited to work in a team environment to pursue the same end goal and develop a piece of Software from the ground up. 
+Darren Reitan is a music teacher from Redding California, winner of the California Arts
+Councils Artist in Residence Grant and California Old Time Fiddlers Association Open State
+champion. He Ran in the Sun Sweet Wildflower ultra marathon in 2009 and is currently
+learning to speak Mandarin. He is a Computer Engineering Major at CSU Chico slated to 
+graduate in the spring of 2015. 
+
+
+Alejandro Velazquez is double majoring in Computer and Electrical Engineering. He transferred to Chico State in the Fall of 2013 with associate degrees in Mathematics and Computer Science. He is excited to work in a team environment to pursue the same end goal and develop a piece of Software from the ground up. 
