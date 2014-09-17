@@ -1,4 +1,5 @@
 vpath %.cpp src
+vpath %.o build
 
 OBJ = gbapp.o
 
@@ -45,4 +46,4 @@ setup:
 	if not exist $(WX_DIR). ( lib\7za.exe x lib\wxwidgets-3.0.1.7z. )
 	
 gbapp: $(OBJ)
-	$(CXX) $(LDFLAGS) $(BUILD_DIR)\$^ $(LDLIBS) -o $(BUILD_DIR)\$(BIN_NAME)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $(BUILD_DIR)\$(BIN_NAME)
