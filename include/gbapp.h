@@ -5,7 +5,7 @@
 
 class GBApp : public wxApp {
     public:
-
+        bool virtual OnInit();
 };
 
 #endif
