@@ -1,6 +1,6 @@
 vpath %.cc src:src\data:src\sql:tests
 
-OBJ = course.o gbsql.o gbapp.o
+OBJ = Main.o gbapp.o 
 TEST_OBJ = gbsqltest.o gbtest.o
 
 BUILD = debug
@@ -78,7 +78,7 @@ setup_test:
 libs:
 	$(MAKE) -C $(WX_MAKE_DIR) -f $(WX_MAKE) BUILD=$(BUILD)
 	$(MAKE) -C $(SQL_DIR)
-	$(MAKE) -C $(WX_SQL_MAKE_DIR) -f $(WX_SQL_MAKE) WXWIN=$(CURDIR)\$(WX_DIR)
+	$(MAKE) -C $(WX_SQL_MAKE_DIR) -f $(WX_SQL_MAKE) WXWIN="$(CURDIR)\$(WX_DIR)"
 
 libs_test:
 	$(MAKE) -C $(GTEST_DIR)\make gtest.a
