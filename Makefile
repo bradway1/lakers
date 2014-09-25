@@ -49,7 +49,7 @@ LDLIBS :=	-lwxcode_msw30ud_wxsqlite3 -lsqlite3 -lwxmsw30ud_core \
 
 OUTPUT_OPTION = -o $(BUILD_DIR)\$@
 
-build: setup libs gbapp ;
+build: setup gbapp ;
 
 release: BUILD=release
 release: build

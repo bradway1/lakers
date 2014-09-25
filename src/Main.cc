@@ -1,19 +1,19 @@
 #include "Main.h"
+#include <wx/string.h>
 
-
-wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(ID_Hello,   MyFrame::OnHello)
-    EVT_MENU(wxID_EXIT,  MyFrame::OnExit)
-    EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+wxBEGIN_EVENT_TABLE(BaseFrame, wxFrame)
+    EVT_MENU(ID_AddCourseMenuSelect,   BaseFrame::AddCourse)
+    EVT_MENU(wxID_EXIT,                BaseFrame::OnExit)
+    EVT_MENU(wxID_ABOUT,               BaseFrame::OnAbout)
 wxEND_EVENT_TABLE()
 
 
-MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+BaseFrame::BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-                     "Help string shown in status bar for this menu item");
+    menuFile->Append(ID_AddCourseMenuSelect, "&Add Course...\tCtrl-G",
+                     "Add a course to your GradeBook");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
     wxMenu *menuHelp = new wxMenu;
@@ -23,18 +23,26 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuBar->Append( menuHelp, "&Help" );
     SetMenuBar( menuBar );
     CreateStatusBar();
-    SetStatusText( "Welcome to wxWidgets!" );
+    SetStatusText( "Welcome to GradeBook!" );
+
+	// Applies BaseBoxSizer to BaseFrame and applies BaseFramePanel inside BaseBoxSizer.
+    wxBoxSizer *BaseBoxSizer = new wxBoxSizer(wxVERTICAL);
+    wxPanel *BaseFramePanel = new wxPanel(this, ID_GradeBookPanel, wxPoint(0,0), gbAppSize, wxTAB_TRAVERSAL, "BaseFramePanel");
+    BaseBoxSizer->Add(BaseFramePanel,0,0,0);
+	DropDown = new wxChoicebook(BaseFramePanel, ID_ChoiceBook, wxPoint(30,30), wxSize(150,20), 0, "DropDownChoice");
+	BaseBoxSizer->Fit(this);
+
 }
-void MyFrame::OnExit(wxCommandEvent& event)
+void BaseFrame::OnExit(wxCommandEvent& event)
 {
     Close( true );
 }
-void MyFrame::OnAbout(wxCommandEvent& event)
+void BaseFrame::OnAbout(wxCommandEvent& event)
 {
-    wxMessageBox( "This is a wxWidgets' Hello world sample",
-                  "About Hello World", wxOK | wxICON_INFORMATION );
+    wxMessageBox( "Grade Book Application version 1.0.0",
+                  "About", wxOK | wxICON_INFORMATION );
 }
-void MyFrame::OnHello(wxCommandEvent& event)
+void BaseFrame::AddCourse(wxCommandEvent& event)
 {
-    wxLogMessage("Hello world from wxWidgets!");
+    wxLogMessage("Dialog Box Screen Next ... needs development ");
 }
