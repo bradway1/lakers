@@ -1,6 +1,6 @@
 vpath %.cc src:src\data:src\sql:tests
 
-OBJ = Main.o gbapp.o 
+OBJ = Main.o student.o course.o gbsql.o gbapp.o 
 TEST_OBJ = gbsqltest.o gbtest.o
 
 BUILD = debug
