@@ -28,6 +28,8 @@ class GBSql {
         int DeleteStudent(const Student &);
         int SelectStudents(vector<Student*> *);
 
+        int AddStudentCourseRelation(const Student &, const Course &);
+
     private:
         wxSQLite3Database m_db;
 

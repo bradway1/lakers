@@ -221,6 +221,27 @@ int GBSql::SelectStudents(vector<Student*> *sVec) {
     return 0;
 }
 
+int GBSql::AddStudentCourseRelation(const Student &s, const Course &c) {
+    static const char *sqlCommand = "INSERT INTO sc_relation (\
+                                     sid, \
+                                     cid) VALUES (?1, ?2)";
+
+    try {
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+
+        smt.Bind(1, *c.GetId());
+        smt.Bind(2, *s.GetStudentId());
+
+        return smt.ExecuteUpdate();
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+
+        return -1;
+    }
+    
+    return 0;
+}
+
 bool GBSql::InitializeDatabase() {
     const char* sqlCommands[] = {
         "CREATE TABLE IF NOT EXISTS courses (\
@@ -234,6 +255,10 @@ bool GBSql::InitializeDatabase() {
             first   TEXT    not null, \
             last    TEXT    not null, \
             primary key(sid))",
+        "CREATE TABLE IF NOT EXISTS sc_relation (\
+            id      INTEGER PRIMARY KEY AUTOINCREMENT, \
+            sid     TEXT    not null, \
+            cid     TEXT    not null)",
         NULL };
 
     int i = 0;

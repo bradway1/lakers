@@ -162,3 +162,22 @@ TEST_F(GBSqlTest, testSelectStudent) {
 
     ASSERT_EQ(2, r);
 }
+
+TEST_F(GBSqlTest, testAddSCRelation) {
+    Student s;
+
+    s.SetStudentId("1");
+    s.SetFirst("John");
+    s.SetLast("Doe");
+
+    Course c;
+
+    c.SetId("1");
+    c.SetTitle("MATH-217");
+    c.SetStart(wxDateTime::Today());
+    c.SetEnd(wxDateTime::Today());
+
+    int r = sql->AddStudentCourseRelation(s, c);
+
+    ASSERT_EQ(1, r);
+}
