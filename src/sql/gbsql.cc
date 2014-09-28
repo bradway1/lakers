@@ -125,14 +125,140 @@ int GBSql::SelectCourse(vector<Course*> *cVec) {
     return ret;
 }
 
+int GBSql::InsertStudent(const Student &s) {
+    static const char *sqlCommand = "INSERT INTO students (\
+                                     sid,       \
+                                     first,     \
+                                     last) VALUES (?1, ?2, ?3)";
+    try {
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+    
+        smt.Bind(1, *s.GetStudentId());
+        smt.Bind(2, *s.GetFirst());
+        smt.Bind(3, *s.GetLast());
+
+        return smt.ExecuteUpdate();
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+    
+        return -1;
+    }
+
+    return 0;
+}
+
+int GBSql::UpdateStudent(const Student &s) {
+    static const char *sqlCommand = "UPDATE students SET \
+                                     first=?1,  \
+                                     last=?2    \
+                                     WHERE sid=?3";
+
+    try {
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+
+        smt.Bind(1, *s.GetFirst());
+        smt.Bind(2, *s.GetLast());
+        smt.Bind(3, *s.GetStudentId());
+
+        return smt.ExecuteUpdate();
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+    
+        return -1;
+    }
+
+    return 0;
+}
+
+int GBSql::DeleteStudent(const Student &s) {
+    static const char *sqlCommand = "DELETE FROM students \
+                                     WHERE sid=?1";
+
+    try {
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+
+        smt.Bind(1, *s.GetStudentId());
+
+        return smt.ExecuteUpdate();
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+    
+        return -1;
+    }
+
+    return 0;
+}
+
+int GBSql::SelectStudents(vector<Student*> *sVec) {
+    static const char *sqlCommand = "SELECT * FROM students";
+    
+    try {
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+
+        wxSQLite3ResultSet r = smt.ExecuteQuery();
+
+        Student *s;
+
+        while (r.NextRow()) {
+            s = new Student();
+
+            s->SetStudentId(r.GetString("sid"));
+
+            s->SetFirst(r.GetString("first"));
+
+            s->SetLast(r.GetString("last"));
+
+            sVec->push_back(s);
+        }
+
+        return sVec->size();
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+        
+        return -1;
+    }
+    
+    return 0;
+}
+
+int GBSql::AddStudentCourseRelation(const Student &s, const Course &c) {
+    static const char *sqlCommand = "INSERT INTO sc_relation (\
+                                     sid, \
+                                     cid) VALUES (?1, ?2)";
+
+    try {
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+
+        smt.Bind(1, *c.GetId());
+        smt.Bind(2, *s.GetStudentId());
+
+        return smt.ExecuteUpdate();
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+
+        return -1;
+    }
+    
+    return 0;
+}
+
 bool GBSql::InitializeDatabase() {
     const char* sqlCommands[] = {
         "CREATE TABLE IF NOT EXISTS courses (\
-            cid     TEXT    not null,\
-            title   TEXT    not null,\
-            start   TEXT    not null,\
-            end     TEXT    not null,\
+            cid     TEXT    not null, \
+            title   TEXT    not null, \
+            start   TEXT    not null, \
+            end     TEXT    not null, \
             primary key(cid))",
+        "CREATE TABLE IF NOT EXISTS students (\
+            sid     TEXT    not null, \
+            first   TEXT    not null, \
+            last    TEXT    not null, \
+            primary key(sid))",
+        "CREATE TABLE IF NOT EXISTS sc_relation (\
+            id      INTEGER PRIMARY KEY AUTOINCREMENT, \
+            sid     TEXT    not null, \
+            cid     TEXT    not null)",
         NULL };
 
     int i = 0;

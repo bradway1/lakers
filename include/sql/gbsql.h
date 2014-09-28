@@ -2,6 +2,7 @@
 #define _GBSQL_H
 
 #include "data/course.h"
+#include "data/student.h"
 
 #include <wx/wxsqlite3.h>
 
@@ -20,6 +21,14 @@ class GBSql {
         int UpdateCourse(const Course &);
         int DeleteCourse(const Course &);
         int SelectCourse(vector<Course*> *);
+
+
+        int InsertStudent(const Student &);
+        int UpdateStudent(const Student &);
+        int DeleteStudent(const Student &);
+        int SelectStudents(vector<Student*> *);
+
+        int AddStudentCourseRelation(const Student &, const Course &);
 
     private:
         wxSQLite3Database m_db;
