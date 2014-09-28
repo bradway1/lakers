@@ -1,5 +1,4 @@
 #include "Main.h"
-#include <wx/string.h>
 
 wxBEGIN_EVENT_TABLE(BaseFrame, wxFrame)
     EVT_MENU(ID_AddCourseMenuSelect,   BaseFrame::AddCourse)
@@ -27,12 +26,37 @@ BaseFrame::BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
 	// Applies BaseBoxSizer to BaseFrame and applies BaseFramePanel inside BaseBoxSizer.
     wxBoxSizer *BaseBoxSizer = new wxBoxSizer(wxVERTICAL);
-    wxPanel *BaseFramePanel = new wxPanel(this, ID_GradeBookPanel, wxPoint(0,0), gbAppSize, wxTAB_TRAVERSAL, "BaseFramePanel");
+    BaseFramePanel = new wxPanel(this, ID_GradeBookPanel, wxPoint(0,0), GBAPPSIZE, wxTAB_TRAVERSAL, "BaseFramePanel");
+
+    // Inserts CourseDropDownList inside BaseFramePanel
+    CourseDropDownList = new wxChoice(BaseFramePanel, ID_CourseDropDownList, wxPoint(30,30), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("CourseDropDownList"));
     BaseBoxSizer->Add(BaseFramePanel,0,0,0);
-	DropDown = new wxChoicebook(BaseFramePanel, ID_ChoiceBook, wxPoint(30,30), wxSize(150,20), 0, "DropDownChoice");
 	BaseBoxSizer->Fit(this);
 
+	PopulateCourseDropDownList();
+
 }
+
+
+
+
+
+void BaseFrame::PopulateCourseDropDownList()
+{
+	std::string str = "Course_";
+
+	// Inside for loop we need to pull data
+	// from DB and populate Dropdown list
+	// with data from DB
+	for(int i = 65; i < 83; i++)
+	{
+		str += char(i);
+		CourseDropDownList->Append(str);
+		str = "Course_";
+	}
+
+}
+
 void BaseFrame::OnExit(wxCommandEvent& event)
 {
     Close( true );
