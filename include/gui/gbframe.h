@@ -8,19 +8,23 @@
 #include <stdlib.h>
 #include <wx/sizer.h>
 #include <wx/colour.h>
+#include <wx/toolbar.h>
+#include <wx/bitmap.h>
+
+
 
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
 
-#define GBAPPSIZE wxSize(1024,768)
+#define GBAPPSIZE wxSize(800,600)
 
 
 
-class BaseFrame: public wxFrame
+class GBFrame: public wxFrame
 {
 public:
-    BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
+    GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 private:
 
 	void PopulateCourseDropDownList();
@@ -29,10 +33,12 @@ private:
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
-    wxChoice *CourseDropDownList;                     // Create an obj for Dropdown list of type wxChoicebook
-    wxPanel *BaseFramePanel;
-	wxTextCtrl* CourseDisplay;                  // Declare a text control box calles course display
-	wxGrid *GridView;
+    wxChoice	*m_pCourseDropDownList;                     // Create an obj for Dropdown list of type wxChoicebook
+    wxPanel		*m_pGBFramePanel;
+	wxTextCtrl	*m_pCourseDisplay;                          // Declare a text control box calles course display
+	wxGrid		*m_pGridView;
+	wxButton	*m_pbtn_AddAssignment;
+	wxToolBar	*m_pUserOptionsToolBar;
 
     wxDECLARE_EVENT_TABLE();
 };
@@ -43,4 +49,5 @@ enum
     ID_CourseDropDownList = 2,
     ID_GradeBookPanel = 3,
     ID_GridView = 4,
+    ID_btn_AddAssignment = 5
 };

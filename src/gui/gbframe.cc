@@ -1,15 +1,13 @@
-#include "Main.h"
+#include "gui\gbframe.h"
 
-wxBEGIN_EVENT_TABLE(BaseFrame, wxFrame)
-    EVT_MENU(ID_AddCourseMenuSelect,   BaseFrame::AddCourse)
-    EVT_MENU(wxID_EXIT,                BaseFrame::OnExit)
-    EVT_MENU(wxID_ABOUT,               BaseFrame::OnAbout)
+wxBEGIN_EVENT_TABLE(GBFrame, wxFrame)
+    EVT_MENU(ID_AddCourseMenuSelect,   GBFrame::AddCourse)
+    EVT_MENU(wxID_EXIT,                GBFrame::OnExit)
+    EVT_MENU(wxID_ABOUT,               GBFrame::OnAbout)
 wxEND_EVENT_TABLE()
 
 
-
-
-BaseFrame::BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+GBFrame::GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
 
@@ -28,26 +26,35 @@ BaseFrame::BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     CreateStatusBar();
     SetStatusText( "Welcome to GradeBook!" );
 
+	UserOptionsToolBar = this->CreateToolBar(wxTB_DEFAULT_STYLE, wxID_ANY, "ID_ToolBar");
 
 
-	wxBoxSizer *GridSizer = new wxBoxSizer(wxVERTICAL);
-	wxBoxSizer *CourseDropDownSizer = new wxBoxSizer(wxVERTICAL);
+	UserOptionsToolBar->AddTool(0, "Add Assignment", wxBitmap(100,25,1), "Add Assignemt Help", wxITEM_NORMAL );
+	UserOptionsToolBar->Realize();
+
+	//wxBoxSizer *GridSizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *UserOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *TopSizer = new wxBoxSizer(wxVERTICAL);
 
 	// Create Base Panel
-    BaseFramePanel = new wxPanel(this, ID_GradeBookPanel, wxPoint(0,0), GBAPPSIZE, wxTAB_TRAVERSAL, "BaseFramePanel");
-	BaseFramePanel->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
+    GBFramePanel = new wxPanel(this, ID_GradeBookPanel, wxPoint(0,0), GBAPPSIZE, wxTAB_TRAVERSAL, "GBFramePanel");
+	//wxWHITE
+	GBFramePanel->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
+
 
 	// Add CourseDropDownList and GridView to Panel
-	CourseDropDownList = new wxChoice(BaseFramePanel, ID_CourseDropDownList, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("CourseDropDownList"));
-	GridView = new wxGrid( BaseFramePanel, ID_GridView, wxDefaultPosition, GBAPPSIZE, 0, "ID_GridView" );
+	CourseDropDownList = new wxChoice(GBFramePanel, ID_CourseDropDownList, wxDefaultPosition, wxSize(100, 25), 0, 0, 0, wxDefaultValidator, _T("CourseDropDownList"));
+	GridView = new wxGrid( GBFramePanel, ID_GridView, wxDefaultPosition, GBAPPSIZE, 0, "ID_GridView" );
+	btn_AddAssignment = new wxButton(GBFramePanel, ID_btn_AddAssignment, "Add Assignment", wxDefaultPosition, wxSize(100,25), 0, wxDefaultValidator, "ID_btn_AddAssignment" );
 
 	// Apply Sizer to CourseDropDownList and GridView
-	TopSizer->Add(CourseDropDownList, 0, wxLEFT | wxTOP, 25);
+	UserOptionsSizer->Add(CourseDropDownList, 0, wxLEFT | wxTOP, 25);
+	UserOptionsSizer->Add(btn_AddAssignment, 0, wxLEFT | wxRIGHT | wxTOP | wxALIGN_RIGHT, 25);
+	TopSizer->Add(UserOptionsSizer, 0 , 0, 0);
 	TopSizer->Add(GridView, 0, wxEXPAND | wxALL, 25);
 
 	// Set TopSizer as primary sizer
-	BaseFramePanel->SetSizer(TopSizer);
+	GBFramePanel->SetSizer(TopSizer);
 
 
 	PopulateCourseDropDownList();
@@ -56,14 +63,14 @@ BaseFrame::BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 }
 
 // *** Modify grid to populate it with data pulled from DB ***
-void BaseFrame::CreateStudentGridView()
+void GBFrame::CreateStudentGridView()
 {
 	std::string str = "Homework_";
 	char buffer[4];
 
 	// Create Student Grid view. 30 rows and 10 columns
 	// Pull from DB
-	GridView->CreateGrid( 30, 250 );
+	GridView->CreateGrid( 30, 100 );
 	GridView->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
 	GridView->Refresh();
 
@@ -95,7 +102,7 @@ void BaseFrame::CreateStudentGridView()
 
 
 // *** Need to pull data from DB to populate Dropdown list ***
-void BaseFrame::PopulateCourseDropDownList()
+void GBFrame::PopulateCourseDropDownList()
 {
 	std::string str = "Course_";
 
@@ -109,16 +116,16 @@ void BaseFrame::PopulateCourseDropDownList()
 
 }
 
-void BaseFrame::OnExit(wxCommandEvent& event)
+void GBFrame::OnExit(wxCommandEvent& event)
 {
     Close( true );
 }
-void BaseFrame::OnAbout(wxCommandEvent& event)
+void GBFrame::OnAbout(wxCommandEvent& event)
 {
     wxMessageBox( "Grade Book Application version 1.0.0",
                   "About", wxOK | wxICON_INFORMATION );
 }
-void BaseFrame::AddCourse(wxCommandEvent& event)
+void GBFrame::AddCourse(wxCommandEvent& event)
 {
     wxLogMessage("Dialog Box Screen ... needs development ");
 }
