@@ -43,9 +43,9 @@ LDFLAGS := 	-L$(SQL_DIR)\lib \
 			-L$(WX_SQL_DIR)\lib\gcc_lib	\
 			-L$(WX_DIR)\lib\gcc_lib \
 
-LDLIBS :=	-lwxcode_msw30ud_wxsqlite3 -lsqlite3 -lwxmsw30ud_core \
+LDLIBS :=	-lwxcode_msw30ud_wxsqlite3 -lsqlite3 -lwxmsw30ud_adv -lwxmsw30ud_core \
 			-lwxbase30ud -luuid -lole32 -loleaut32 -lwxregexud -lcomctl32 \
-			-lgdi32 -lwxpngd -lwxzlibd -lcomdlg32 -lwinspool
+			-lgdi32 -lwxpngd -lwxzlibd -lcomdlg32 -lwinspool 
 
 OUTPUT_OPTION = -o $(BUILD_DIR)\$@
 

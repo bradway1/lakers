@@ -7,10 +7,13 @@ wxBEGIN_EVENT_TABLE(BaseFrame, wxFrame)
 wxEND_EVENT_TABLE()
 
 
+
+
 BaseFrame::BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
-	// create standard generic pbjects
+
+	// Create File Menu
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(ID_AddCourseMenuSelect, "&Add Course...\tCtrl-G",
                      "Add a course to your GradeBook");
@@ -25,40 +28,78 @@ BaseFrame::BaseFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     CreateStatusBar();
     SetStatusText( "Welcome to GradeBook!" );
 
-	// Applies BaseBoxSizer to BaseFrame and applies BaseFramePanel inside BaseBoxSizer.
-    wxBoxSizer *BaseBoxSizer = new wxBoxSizer(wxVERTICAL);
+
+
+	wxBoxSizer *GridSizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *CourseDropDownSizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *TopSizer = new wxBoxSizer(wxVERTICAL);
+
+	// Create Base Panel
     BaseFramePanel = new wxPanel(this, ID_GradeBookPanel, wxPoint(0,0), GBAPPSIZE, wxTAB_TRAVERSAL, "BaseFramePanel");
+	BaseFramePanel->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
 
-    // Inserts CourseDropDownList inside BaseFramePanel
-    BaseBoxSizer->Add(BaseFramePanel,0,0,0);
+	// Add CourseDropDownList and GridView to Panel
+	CourseDropDownList = new wxChoice(BaseFramePanel, ID_CourseDropDownList, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("CourseDropDownList"));
+	GridView = new wxGrid( BaseFramePanel, ID_GridView, wxDefaultPosition, GBAPPSIZE, 0, "ID_GridView" );
 
+	// Apply Sizer to CourseDropDownList and GridView
+	TopSizer->Add(CourseDropDownList, 0, wxLEFT | wxTOP, 25);
+	TopSizer->Add(GridView, 0, wxEXPAND | wxALL, 25);
 
-	// Puts dropdown and text control boxes in front sizer
-	wxBoxSizer *FrontBoxSizer = new wxBoxSizer(wxVERTICAL);
-	CourseDropDownList = new wxChoice(BaseFramePanel, ID_CourseDropDownList, wxPoint(30,30), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("CourseDropDownList"));
-	FrontBoxSizer->Add(CourseDropDownList, 1, wxEXPAND | wxALL, 10);
-	CourseDisplay = new wxTextCtrl(BaseFramePanel, ID_CourseDisplay, _("<Enter text here to open dialog box>"), wxPoint(100,100), wxSize(300,100), wxTE_MULTILINE, wxDefaultValidator, _T("ID_CourseDisplay"));
-	FrontBoxSizer->Add(ID_CourseDisplay, 1, wxEXPAND | wxALL, 10);
+	// Set TopSizer as primary sizer
+	BaseFramePanel->SetSizer(TopSizer);
 
-	// Causes parents objects to fit
-    BaseBoxSizer->Fit(this);
-	FrontBoxSizer->Fit(BaseFramePanel);
 
 	PopulateCourseDropDownList();
+	CreateStudentGridView();
 
+}
+
+// *** Modify grid to populate it with data pulled from DB ***
+void BaseFrame::CreateStudentGridView()
+{
+	std::string str = "Homework_";
+	char buffer[4];
+
+	// Create Student Grid view. 30 rows and 10 columns
+	// Pull from DB
+	GridView->CreateGrid( 30, 250 );
+	GridView->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
+	GridView->Refresh();
+
+	GridView->EnableDragColMove(true);
+    GridView->EnableEditing(true);
+
+	// Pull Data from DB
+	for(int i = 0; i < 10; i++)
+	{
+		itoa(i+1, buffer, 10);
+		str += buffer;
+		GridView->SetColLabelValue(i,str);
+
+		str = "Homework_";
+	}
+
+	// Pull Data from DB
+	str = "Student_";
+	for(int i = 0; i < 100; i++)
+	{
+		itoa(i+1, buffer, 10);
+		str += buffer;
+		GridView->SetRowLabelValue(i, str);
+		str = "Student_";
+	}
 }
 
 
 
 
-
+// *** Need to pull data from DB to populate Dropdown list ***
 void BaseFrame::PopulateCourseDropDownList()
 {
 	std::string str = "Course_";
 
-	// Inside for loop we need to pull data
-	// from DB and populate Dropdown list
-	// with data from DB
+	// Static Data
 	for(int i = 65; i < 83; i++)
 	{
 		str += char(i);
@@ -79,5 +120,5 @@ void BaseFrame::OnAbout(wxCommandEvent& event)
 }
 void BaseFrame::AddCourse(wxCommandEvent& event)
 {
-    wxLogMessage("Dialog Box Screen Next ... needs development ");
+    wxLogMessage("Dialog Box Screen ... needs development ");
 }
