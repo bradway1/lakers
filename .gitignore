@@ -2,7 +2,9 @@
 *.swp
 *.o
 *.exe
+*.db
 
+build/
 lib/wxwidgets*/
 lib/wxsqlite*/
 lib/gtest*/
