@@ -58,31 +58,34 @@ run: build
 	$(BUILD_DIR)\$(APP_NAME)
 
 test: CPPFLAGS += -I$(GTEST_DIR)\include 
-test: LDFLAGS += -L$(GTEST_DIR)\make 
-test: LDLIBS += -lgtest
-test: setup_test libs_test build_test
+test: setup build_test
 	
 build_test: $(OBJ) $(TEST_OBJ)
-	$(CXX) $(LDFLAGS) $(addprefix $(BUILD_DIR)\, $^) $(LDLIBS) \
-		-o $(BUILD_DIR)\test.exe
+	$(CXX) $(LDFLAGS) -L$(GTEST_DIR)\make $(addprefix $(BUILD_DIR)\, $^) \
+		$(LDLIBS) -lgtest -o $(BUILD_DIR)\test.exe
 	$(BUILD_DIR)\test.exe
 
-setup:
-	if not exist $(BUILD_DIR). ( mkdir $(BUILD_DIR). )
-	if not exist $(WX_DIR). ( $(ARCH_TOOL) x -olib lib\$(WX_ARCH). )
-	if not exist $(WX_SQL_DIR). ( $(ARCH_TOOL) x -olib lib\$(WX_SQL_ARCH). )
+setup: wxwidgets wxsqlite3 gtest
 
-setup_test:
-	if not exist $(GTEST_DIR). ( $(ARCH_TOOL) x -olib lib\$(GTEST_ARCH). )
-
-libs:
+wxwidgets:
+ifeq (,$(wildcard $(WX_DIR)))
+	$(ARCH_TOOL) x -olib lib\$(WX_ARCH)
 	$(MAKE) -C $(WX_MAKE_DIR) -f $(WX_MAKE) BUILD=$(BUILD)
-	$(MAKE) -C $(SQL_DIR)
-	$(MAKE) -C $(WX_SQL_MAKE_DIR) -f $(WX_SQL_MAKE) WXWIN="$(CURDIR)\$(WX_DIR)"
+endif
 
-libs_test:
+wxsqlite3:
+ifeq (,$(wildcard $(WX_SQL_DIR)))
+	$(ARCH_TOOL) x -olib lib\$(WX_SQL_ARCH)
+	$(MAKE) -C $(SQL_DIR)
+	$(MAKE) -C $(WX_SQL_MAKE_DIR) -f $(WX_SQL_MAKE) WXWIN=$(CURDIR)\$(WX_DIR)
+endif
+
+gtest:
+ifeq (,$(wildcard $(GTEST_DIR)))
+	$(ARCH_TOOL) x -olib lib\$(GTEST_ARCH)
 	$(MAKE) -C $(GTEST_DIR)\make gtest.a
 	copy $(GTEST_DIR)\make\gtest.a $(GTEST_DIR)\make\libgtest.a
+endif
 
 gbapp: $(OBJ)
 	$(CXX) $(LDFLAGS) $(OUTPUT_OBJ) $(LDLIBS) -o $(BUILD_DIR)\$(APP_NAME)
