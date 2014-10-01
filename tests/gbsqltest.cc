@@ -181,3 +181,64 @@ TEST_F(GBSqlTest, testAddSCRelation) {
 
     ASSERT_EQ(1, r);
 }
+
+TEST_F(GBSqlTest, testInsertAssessment) {
+    Assessment a;
+
+    a.SetId("1");
+    a.SetCourseId("MATH-217");
+    a.SetTitle("Test1");
+    a.SetDate(wxDateTime::Today());
+
+    int r = sql->InsertAssessment(a);
+
+    ASSERT_EQ(1, r);
+}
+
+TEST_F(GBSqlTest, testUpdateAssessment) {
+     Assessment a;
+
+    a.SetId("1");
+    a.SetCourseId("MATH-217");
+    a.SetTitle("Test1");
+    a.SetDate(wxDateTime::Today());
+
+    sql->InsertAssessment(a);
+
+    a.SetTitle("Test2");
+
+    int r = sql->UpdateAssessment(a);
+
+    ASSERT_EQ(1, r);   
+}
+
+TEST_F(GBSqlTest, testDeleteAssessment) {
+    Assessment a;
+
+    a.SetId("1");
+    a.SetCourseId("MATH-217");
+    a.SetTitle("Test1");
+    a.SetDate(wxDateTime::Today());
+
+    sql->InsertAssessment(a);
+
+    int r = sql->DeleteAssessment(a);
+
+    ASSERT_EQ(1, r);
+}
+
+TEST_F(GBSqlTest, testSelectAssessments) {
+    Assessment a;
+    vector<Assessment*> aVec;
+
+    a.SetId("1");
+    a.SetCourseId("MATH-217");
+    a.SetTitle("Test1");
+    a.SetDate(wxDateTime::Today());
+
+    sql->InsertAssessment(a);
+
+    int r = sql->SelectAssessments(&aVec);
+
+    ASSERT_EQ(1, r);
+}

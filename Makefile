@@ -1,6 +1,6 @@
 vpath %.cc src:src\data:src\sql:tests:src\gui
 
-OBJ = gbframe.o student.o course.o gbsql.o gbapp.o 
+OBJ = gbframe.o assessment.o student.o course.o gbsql.o gbapp.o 
 TEST_OBJ = gbsqltest.o gbtest.o
 
 BUILD = debug
@@ -31,7 +31,8 @@ GTEST_ARCH = gtest-$(GTEST_VER).7z
 
 ARCH_TOOL = tools\7za.exe
 
-CPPFLAGS := -Iinclude \
+CPPFLAGS := -std=c++11 \
+			-Iinclude \
 			-Iinclude\data \
 			-Iinclude\sql \
 			-I$(WX_DIR)\include \
