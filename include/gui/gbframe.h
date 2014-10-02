@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <wx/wxprec.h>
 #include <wx/notebook.h>
 #include <wx/panel.h>
@@ -5,11 +6,12 @@
 #include <wx/choice.h>
 #include <wx/textctrl.h>
 #include <wx/grid.h>
-#include <stdlib.h>
 #include <wx/sizer.h>
 #include <wx/colour.h>
 #include <wx/toolbar.h>
 #include <wx/bitmap.h>
+#include <wx/image.h>
+#include <wx/dialog.h>
 
 
 
@@ -28,17 +30,22 @@ public:
 private:
 
 	void PopulateCourseDropDownList();
-	void CreateStudentGridView();
+	void CreateGridView();
     void AddCourse(wxCommandEvent& event);
+    void EditAssignment(wxCommandEvent& event);
+    void AddAssignment(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
-    wxChoice	*m_pCourseDropDownList;                     // Create an obj for Dropdown list of type wxChoicebook
+	wxBoxSizer 	*m_pCourseDropDownListSizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer 	*m_pGBFrameSizer = new wxBoxSizer(wxVERTICAL);
+    wxChoice	*m_pCourseDropDownList;
     wxPanel		*m_pGBFramePanel;
-	wxTextCtrl	*m_pCourseDisplay;                          // Declare a text control box calles course display
+	wxTextCtrl	*m_pCourseDisplay;
 	wxGrid		*m_pGridView;
 	wxButton	*m_pbtn_AddAssignment;
 	wxToolBar	*m_pUserOptionsToolBar;
+	wxDialog	*m_pAssessmentFrame;
 
     wxDECLARE_EVENT_TABLE();
 };
@@ -49,5 +56,8 @@ enum
     ID_CourseDropDownList = 2,
     ID_GradeBookPanel = 3,
     ID_GridView = 4,
-    ID_btn_AddAssignment = 5
+    ID_btn_AddAssignment = 5,
+    ID_btn_ToolBarAddAssignment = 6,
+    ID_btn_ToolBarEditAssignment = 7,
+    ID_AssessmentFrame = 8,
 };

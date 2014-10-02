@@ -1,9 +1,11 @@
 #include "gui\gbframe.h"
 
 wxBEGIN_EVENT_TABLE(GBFrame, wxFrame)
-    EVT_MENU(ID_AddCourseMenuSelect,   GBFrame::AddCourse)
-    EVT_MENU(wxID_EXIT,                GBFrame::OnExit)
-    EVT_MENU(wxID_ABOUT,               GBFrame::OnAbout)
+    EVT_MENU(wxID_EXIT,                		GBFrame::OnExit)
+    EVT_MENU(wxID_ABOUT,               		GBFrame::OnAbout)
+    EVT_MENU(ID_AddCourseMenuSelect,   		GBFrame::AddCourse)
+    EVT_MENU(ID_btn_ToolBarAddAssignment,	GBFrame::AddAssignment)
+    EVT_MENU(ID_btn_ToolBarEditAssignment,	GBFrame::EditAssignment)
 wxEND_EVENT_TABLE()
 
 
@@ -13,8 +15,7 @@ GBFrame::GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	// Create File Menu
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(ID_AddCourseMenuSelect, "&Add Course...\tCtrl-G",
-                     "Add a course to your GradeBook");
+    menuFile->Append(ID_AddCourseMenuSelect, "&Add Course...\tCtrl-G", "Add a course to your GradeBook");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
     wxMenu *menuHelp = new wxMenu;
@@ -26,76 +27,54 @@ GBFrame::GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     CreateStatusBar();
     SetStatusText( "Welcome to GradeBook!" );
 
+	// Create ToolBar
 	m_pUserOptionsToolBar = this->CreateToolBar(wxTB_DEFAULT_STYLE, wxID_ANY, "ID_ToolBar");
-
-
-	m_pUserOptionsToolBar->AddTool(0, "Add Assignment", wxBitmap(100,25,1), "Add Assignemt Help", wxITEM_NORMAL );
+	m_pUserOptionsToolBar->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
+	m_pUserOptionsToolBar->AddTool(ID_btn_ToolBarAddAssignment, "Add Assignment", wxBitmap(wxImage(_T("C:\\lakers\\resources\\AddAssignment.bmp"))), "Add Assignemt(s)", wxITEM_NORMAL );
+	m_pUserOptionsToolBar->AddTool(ID_btn_ToolBarEditAssignment, "Edit Assignment", wxBitmap(wxImage(_T("C:\\lakers\\resources\\EditAssignment.bmp"))), "Edit Assignemt(s)", wxITEM_NORMAL );
 	m_pUserOptionsToolBar->Realize();
 
-	//wxBoxSizer *GridSizer = new wxBoxSizer(wxVERTICAL);
-	wxBoxSizer *UserOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *TopSizer = new wxBoxSizer(wxVERTICAL);
+	// Create Frame Sizers
+	m_pCourseDropDownListSizer = new wxBoxSizer(wxHORIZONTAL);
+	m_pGBFrameSizer = new wxBoxSizer(wxVERTICAL);
 
 	// Create Base Panel
     m_pGBFramePanel = new wxPanel(this, ID_GradeBookPanel, wxPoint(0,0), GBAPPSIZE, wxTAB_TRAVERSAL, "GBFramePanel");
-	//wxWHITE
-	m_pGBFramePanel->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
-
+	m_pGBFramePanel->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));//wxWHITE
 
 	// Add CourseDropDownList and GridView to Panel
 	m_pCourseDropDownList = new wxChoice(m_pGBFramePanel, ID_CourseDropDownList, wxDefaultPosition, wxSize(100, 25), 0, 0, 0, wxDefaultValidator, _T("CourseDropDownList"));
 	m_pGridView = new wxGrid(m_pGBFramePanel, ID_GridView, wxDefaultPosition, GBAPPSIZE, 0, "ID_GridView" );
-	m_pbtn_AddAssignment = new wxButton(m_pGBFramePanel, ID_btn_AddAssignment, "Add Assignment", wxDefaultPosition, wxSize(100,25), 0, wxDefaultValidator, "ID_btn_AddAssignment" );
 
 	// Apply Sizer to CourseDropDownList and GridView
-	UserOptionsSizer->Add(m_pCourseDropDownList, 0, wxLEFT | wxTOP, 25);
-	UserOptionsSizer->Add(m_pbtn_AddAssignment, 0, wxLEFT | wxRIGHT | wxTOP | wxALIGN_RIGHT, 25);
-	TopSizer->Add(UserOptionsSizer, 0 , 0, 0);
-	TopSizer->Add(m_pGridView, 0, wxEXPAND | wxALL, 25);
+	m_pCourseDropDownListSizer->Add(m_pCourseDropDownList, 0, wxLEFT | wxTOP, 25);
+	m_pGBFrameSizer->Add(m_pCourseDropDownListSizer, 0 , 0);
+	m_pGBFrameSizer->Add(m_pGridView, 0, wxEXPAND | wxALL, 25);
 
-	// Set TopSizer as primary sizer
-	m_pGBFramePanel->SetSizer(TopSizer);
-
+	// Set GBFrameSizer as primary sizer
+	m_pGBFramePanel->SetSizer(m_pGBFrameSizer);
 
 	PopulateCourseDropDownList();
-	CreateStudentGridView();
+	CreateGridView();
 
 }
 
 // *** Modify grid to populate it with data pulled from DB ***
-void GBFrame::CreateStudentGridView()
+void GBFrame::CreateGridView()
 {
-	std::string str = "Homework_";
-	char buffer[4];
+	// Create Student Grid view.
+	// Number of students in course = rows
+	// Total assessments = columns
 
-	// Create Student Grid view. 30 rows and 10 columns
-	// Pull from DB
-	m_pGridView->CreateGrid( 30, 100 );
-	m_pGridView->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
+	m_pGridView->CreateGrid( 30, 10 );
+	m_pGridView->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0)));
 	m_pGridView->Refresh();
 
 	m_pGridView->EnableDragColMove(true);
     m_pGridView->EnableEditing(true);
 
 	// Pull Data from DB
-	for(int i = 0; i < 10; i++)
-	{
-		itoa(i+1, buffer, 10);
-		str += buffer;
-		m_pGridView->SetColLabelValue(i,str);
 
-		str = "Homework_";
-	}
-
-	// Pull Data from DB
-	str = "Student_";
-	for(int i = 0; i < 100; i++)
-	{
-		itoa(i+1, buffer, 10);
-		str += buffer;
-		m_pGridView->SetRowLabelValue(i, str);
-		str = "Student_";
-	}
 }
 
 
@@ -104,15 +83,19 @@ void GBFrame::CreateStudentGridView()
 // *** Need to pull data from DB to populate Dropdown list ***
 void GBFrame::PopulateCourseDropDownList()
 {
-	std::string str = "Course_";
 
-	// Static Data
-	for(int i = 65; i < 83; i++)
-	{
-		str += char(i);
-		m_pCourseDropDownList->Append(str);
-		str = "Course_";
-	}
+
+}
+
+void GBFrame::EditAssignment(wxCommandEvent& event)
+{
+	// Handle Event
+
+}
+
+void GBFrame::AddAssignment(wxCommandEvent& event)
+{
+	// Handle Event
 
 }
 
