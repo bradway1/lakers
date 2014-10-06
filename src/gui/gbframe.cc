@@ -1,16 +1,14 @@
 #include "gui\gbframe.h"
 
 wxBEGIN_EVENT_TABLE(GBFrame, wxFrame)
-    EVT_MENU(wxID_EXIT,                		GBFrame::OnExit)
-    EVT_MENU(wxID_ABOUT,               		GBFrame::OnAbout)
-    EVT_MENU(ID_AddCourseMenuSelect,   		GBFrame::AddCourse)
-    EVT_MENU(ID_btn_ToolBarAddAssignment,	GBFrame::AddAssignment)
-    EVT_MENU(ID_btn_ToolBarEditAssignment,	GBFrame::EditAssignment)
+    EVT_MENU(wxID_EXIT,                			GBFrame::OnExit)
+    EVT_MENU(wxID_ABOUT,               			GBFrame::OnAbout)
+    EVT_MENU(ID_AddCourseMenuSelect,   			GBFrame::AddCourse)
+    EVT_MENU(ID_ModifyAssignmentToolBarButton,	GBFrame::ModifyAssignments)
 wxEND_EVENT_TABLE()
 
 
-GBFrame::GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-        : wxFrame(NULL, wxID_ANY, title, pos, size)
+GBFrame::GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size): wxFrame(NULL, wxID_ANY, title, pos, size)
 {
 
 	// Create File Menu
@@ -30,8 +28,8 @@ GBFrame::GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	// Create ToolBar
 	m_pUserOptionsToolBar = this->CreateToolBar(wxTB_DEFAULT_STYLE, wxID_ANY, "ID_ToolBar");
 	m_pUserOptionsToolBar->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));
-	m_pUserOptionsToolBar->AddTool(ID_btn_ToolBarAddAssignment, "Add Assignment", wxBitmap(wxImage(_T("C:\\lakers\\resources\\AddAssignment.bmp"))), "Add Assignemt(s)", wxITEM_NORMAL );
-	m_pUserOptionsToolBar->AddTool(ID_btn_ToolBarEditAssignment, "Edit Assignment", wxBitmap(wxImage(_T("C:\\lakers\\resources\\EditAssignment.bmp"))), "Edit Assignemt(s)", wxITEM_NORMAL );
+	m_pModifyAssignmentToolBarButton = new wxToolBarToolBase(NULL, ID_ModifyAssignmentToolBarButton, "Modify Assignment", wxBitmap(wxImage(_T("\\lakers\\resources\\Assignment.bmp"))),  wxNullBitmap, wxITEM_NORMAL, NULL, "Modify Assignment(s)", wxEmptyString);
+	m_pUserOptionsToolBar->AddTool(m_pModifyAssignmentToolBarButton);
 	m_pUserOptionsToolBar->Realize();
 
 	// Create Frame Sizers
@@ -65,7 +63,6 @@ void GBFrame::CreateGridView()
 	// Create Student Grid view.
 	// Number of students in course = rows
 	// Total assessments = columns
-
 	m_pGridView->CreateGrid( 30, 10 );
 	m_pGridView->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0)));
 	m_pGridView->Refresh();
@@ -74,28 +71,53 @@ void GBFrame::CreateGridView()
     m_pGridView->EnableEditing(true);
 
 	// Pull Data from DB
-
 }
-
-
 
 
 // *** Need to pull data from DB to populate Dropdown list ***
 void GBFrame::PopulateCourseDropDownList()
 {
-
-
 }
 
-void GBFrame::EditAssignment(wxCommandEvent& event)
+void GBFrame::AssignmentSelected(wxCommandEvent& event)
 {
-	// Handle Event
-
+	// Handle Event when assignment is selected inside
+	// the "Edit Assignment" dialog box.
 }
 
-void GBFrame::AddAssignment(wxCommandEvent& event)
+
+void GBFrame::ModifyAssignments(wxCommandEvent& event)
 {
 	// Handle Event
+	wxChoice				*ChooseCourseDropDownList;
+	wxArrayString			 Assignments;
+	wxStaticBox				*CourseSelectStaticBox;
+	wxStaticBox 			*ModifyAssignmentStaticBox;
+	wxEditableListBox		*ModifyAssignmentListBox;
+	wxStaticText			*RenameAssignmentStaticText;
+
+	// Create Dialog
+	m_pGBDialog = new wxDialog(this, ID_GBDialog, "Edit Assignment", wxDefaultPosition, GBDIALOGSIZE, wxDEFAULT_DIALOG_STYLE, "ID_GBDialog");
+	// Create Panel
+    m_pGBDialogPanel = new wxPanel(m_pGBDialog, ID_GBDialogPanel, wxPoint(0,0), GBDIALOGSIZE, wxTAB_TRAVERSAL, "ID_GBDialogPanel");
+	// Create Static Boxes
+	CourseSelectStaticBox = new wxStaticBox(m_pGBDialogPanel, wxID_ANY, "Select Course", wxPoint(10,10), wxSize(325,75), 0,"Select Course");
+	ModifyAssignmentStaticBox = new wxStaticBox(m_pGBDialogPanel, wxID_ANY, "Modify Assignment", wxPoint(10,100), wxSize(325, 175), 0,"Select Course");
+	// Create DropdownList
+	ChooseCourseDropDownList = new wxChoice(m_pGBDialogPanel, wxID_ANY, wxPoint(20,40), wxSize(100, 25), 0, 0, 0, wxDefaultValidator, _T("ChooseCourse"));
+	// Create Assignment EditableListBox
+	ModifyAssignmentListBox = new wxEditableListBox(m_pGBDialogPanel, wxID_ANY, "Modify Assignment(s)", wxPoint(20,125), wxSize(310,130), wxEL_DEFAULT_STYLE, "Modify Assignment(s)");
+	Assignments.Alloc(10); /* Modify to allocate enough memory for the correct total assignemtns in DB */
+	ModifyAssignmentListBox->SetStrings(Assignments);
+	// Connect GBFrame::AssignmentSelected to handle event from EditableListBox
+	ModifyAssignmentListBox->Bind(wxEVT_LIST_ITEM_SELECTED, &GBFrame::AssignmentSelected, this);
+	// Show Dialog
+	m_pGBDialog->ShowModal();
+}
+
+
+void GBFrame::AddCourse(wxCommandEvent& event)
+{
 
 }
 
@@ -103,12 +125,9 @@ void GBFrame::OnExit(wxCommandEvent& event)
 {
     Close( true );
 }
+
 void GBFrame::OnAbout(wxCommandEvent& event)
 {
     wxMessageBox( "Grade Book Application version 1.0.0",
                   "About", wxOK | wxICON_INFORMATION );
-}
-void GBFrame::AddCourse(wxCommandEvent& event)
-{
-    wxLogMessage("Dialog Box Screen ... needs development ");
 }
