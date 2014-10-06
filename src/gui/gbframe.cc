@@ -118,7 +118,27 @@ void GBFrame::ModifyAssignments(wxCommandEvent& event)
 
 void GBFrame::AddCourse(wxCommandEvent& event)
 {
+	wxGrid					*AddCourseGridView;
+	wxStaticBox				*CourseNameStaticBox;
+	wxStaticBox				*CourseNumberStaticBox;
+	wxStaticBox				*ImportStudentCSVStaticBox;
+	wxTextCtrl				*CourseNameTextCtrl;
+	wxTextCtrl				*CourseNumberTextCtrl;
+	wxFilePickerCtrl		*ImportStudentCSVFilePickerCtrl;
 
+	// Create Dialog
+	m_pGBDialog = new wxDialog(this, ID_GBDialog, "Add Course", wxDefaultPosition, GBDIALOGSIZE, wxDEFAULT_DIALOG_STYLE, "ID_GBDialog");
+	// Create Panel
+    m_pGBDialogPanel = new wxPanel(m_pGBDialog, ID_GBDialogPanel, wxPoint(0,0), GBDIALOGSIZE, wxTAB_TRAVERSAL, "ID_GBDialogPanel");
+	// Create Static Box and TextCtrl
+	CourseNameStaticBox = new wxStaticBox(m_pGBDialogPanel, wxID_ANY, "Course Name", wxPoint(10,10), wxSize(325,50), 0,"Course Name");
+	CourseNameTextCtrl	= new wxTextCtrl(m_pGBDialogPanel, wxID_ANY, wxEmptyString, wxPoint(20,30), wxSize(300,25), wxTE_CAPITALIZE, wxDefaultValidator, "CourseNameTextCtrl");
+	CourseNumberStaticBox =  new wxStaticBox(m_pGBDialogPanel, wxID_ANY, "Course Number", wxPoint(10,75), wxSize(325,50), 0,"Course Number");
+	CourseNumberTextCtrl  = new wxTextCtrl(m_pGBDialogPanel, wxID_ANY, wxEmptyString, wxPoint(20,95), wxSize(300,25), wxTE_CAPITALIZE, wxDefaultValidator, "CourseNumberTextCtrl");
+	ImportStudentCSVStaticBox =  new wxStaticBox(m_pGBDialogPanel, wxID_ANY, "Import Students (File: *.csv)", wxPoint(10,140), wxSize(325,50), 0,"Import Students");
+	ImportStudentCSVFilePickerCtrl = new wxFilePickerCtrl(m_pGBDialogPanel, wxID_ANY, wxEmptyString, "Select .csv file", "*.csv", wxPoint(20,160),  wxDefaultSize, wxFLP_DEFAULT_STYLE, wxDefaultValidator, "ImportStudentCSVFilePickerCtrl");
+	// Show Dialog
+	m_pGBDialog->ShowModal();
 }
 
 void GBFrame::OnExit(wxCommandEvent& event)
