@@ -30,6 +30,7 @@ GTEST_DIR = lib\gtest-$(GTEST_VER)
 GTEST_ARCH = gtest-$(GTEST_VER).7z
 
 ARCH_TOOL = tools\7za.exe
+SQL_TOOL = tools\sqlite3.exe
 
 CPPFLAGS := -std=c++11 \
 			-Iinclude \
@@ -67,6 +68,9 @@ build_test: $(OBJ) $(TEST_OBJ)
 	$(BUILD_DIR)\test.exe
 
 setup: wxwidgets wxsqlite3 gtest
+
+dummy:
+	$(SQL_TOOL) build\gb.db < tests\data\gb.sql
 
 wxwidgets:
 ifeq (,$(wildcard $(WX_DIR)))
