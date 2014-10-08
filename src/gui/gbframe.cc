@@ -1,5 +1,7 @@
 #include "gui\gbframe.h"
 
+#include "sql\gbsql.h"
+
 wxBEGIN_EVENT_TABLE(GBFrame, wxFrame)
     EVT_MENU(wxID_EXIT,                			GBFrame::OnExit)
     EVT_MENU(wxID_ABOUT,               			GBFrame::OnAbout)
@@ -41,11 +43,14 @@ GBFrame::GBFrame(const wxString& title, const wxPoint& pos, const wxSize& size):
 	m_pGBFramePanel->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0) ));//wxWHITE
 
 	// Add CourseDropDownList and GridView to Panel
-	m_pCourseDropDownList = new wxChoice(m_pGBFramePanel, ID_CourseDropDownList, wxDefaultPosition, wxSize(100, 25), 0, 0, 0, wxDefaultValidator, _T("CourseDropDownList"));
-	m_pGridView = new wxGrid(m_pGBFramePanel, ID_GridView, wxDefaultPosition, GBAPPSIZE, 0, "ID_GridView" );
+	m_pCourseComboBox = new wxComboBox(m_pGBFramePanel, ID_CourseDropDownList, \
+      wxEmptyString, wxDefaultPosition, wxSize(200, 20));
+	m_pCourseComboBox->SetEditable(false);
+  
+  m_pGridView = new wxGrid(m_pGBFramePanel, ID_GridView, wxDefaultPosition, GBAPPSIZE, 0, "ID_GridView" );
 
 	// Apply Sizer to CourseDropDownList and GridView
-	m_pCourseDropDownListSizer->Add(m_pCourseDropDownList, 0, wxLEFT | wxTOP, 25);
+	m_pCourseDropDownListSizer->Add(m_pCourseComboBox, 0, wxLEFT | wxTOP, 25);
 	m_pGBFrameSizer->Add(m_pCourseDropDownListSizer, 0 , 0);
 	m_pGBFrameSizer->Add(m_pGridView, 0, wxEXPAND | wxALL, 25);
 
@@ -73,10 +78,25 @@ void GBFrame::CreateGridView()
 	// Pull Data from DB
 }
 
-
 // *** Need to pull data from DB to populate Dropdown list ***
 void GBFrame::PopulateCourseDropDownList()
 {
+    GBSql sql;
+    vector<Course*> courseVec;
+
+    if (sql.SelectCourse(&courseVec) < 0) { 
+      return; 
+    }
+
+    for (int i = 0; i < courseVec.size(); ++i) {
+      Course *pCourse = courseVec[i];
+    
+      m_pCourseComboBox->Append(*pCourse->GetTitle());
+    }
+
+    if (m_pCourseComboBox->GetCount() > 0) {
+      m_pCourseComboBox->SetSelection(0);
+    }
 }
 
 void GBFrame::AssignmentSelected(wxCommandEvent& event)

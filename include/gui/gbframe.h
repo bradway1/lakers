@@ -6,6 +6,7 @@
 #include <wx/listctrl.h>
 #include <wx/event.h>
 #include <wx/filepicker.h>
+#include <wx/combobox.h>
 
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
@@ -34,7 +35,8 @@ private:
 
 	wxBoxSizer 			*m_pCourseDropDownListSizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer 			*m_pGBFrameSizer = new wxBoxSizer(wxVERTICAL);
-    wxChoice			*m_pCourseDropDownList;
+  wxComboBox *m_pCourseComboBox;  
+  wxChoice			*m_pCourseDropDownList;
     wxPanel				*m_pGBFramePanel;
 	wxGrid				*m_pGridView;
 	wxToolBar			*m_pUserOptionsToolBar;
