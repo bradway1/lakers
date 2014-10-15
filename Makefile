@@ -32,14 +32,13 @@ GTEST_ARCH = gtest-$(GTEST_VER).7z
 ARCH_TOOL = tools\7za.exe
 SQL_TOOL = tools\sqlite3.exe
 
-CPPFLAGS := -std=c++11 \
-			-Iinclude \
-			-Iinclude\data \
-			-Iinclude\sql \
-			-I$(WX_DIR)\include \
-			-I$(WX_DIR)\lib\gcc_lib\mswud \
-			-I$(WX_SQL_DIR)\include \
-			-DBUILD=$(BUILD)
+CPPFLAGS := -Iinclude \
+						-Iinclude\data \
+						-Iinclude\sql \
+					-I$(WX_DIR)\include \
+					-I$(WX_DIR)\lib\gcc_lib\mswud \
+					-I$(WX_SQL_DIR)\include \
+					-DBUILD=$(BUILD)
 
 LDFLAGS := 	-L$(SQL_DIR)\lib \
 			-L$(WX_SQL_DIR)\lib\gcc_lib	\
