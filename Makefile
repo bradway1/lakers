@@ -1,5 +1,3 @@
-vpath %.cc src:src\data:src\sql:tests:src\gui
-
 BUILD_DIR = build
 
 SRCS := src\data\assessment.cc \
@@ -9,7 +7,12 @@ SRCS := src\data\assessment.cc \
 				src\sql\gbsql.cc \
 				src\gbapp.cc
 
+TEST_SRCS := tests\gbsqltest.cc \
+						 tests\gbtest.cc
+
 OBJS := $(SRCS:%.cc=$(BUILD_DIR)/%.o)
+
+TEST_OBJS := $(TEST_SRCS:%.cc=$(BUILD_DIR)/%.o)
 
 BUILD = debug
 
@@ -40,11 +43,13 @@ CPPFLAGS := -Iinclude \
 						-I$(WX_DIR)\include \
 						-I$(WX_DIR)\lib\gcc_lib\mswud \
 						-I$(WX_SQL_DIR)\include \
+						-I$(GTEST_DIR)\include \
 						-DBUILD=$(BUILD)
 
 LDFLAGS := 	-L$(SQL_DIR)\lib \
 						-L$(WX_SQL_DIR)\lib\gcc_lib	\
 						-L$(WX_DIR)\lib\gcc_lib \
+						-L$(GTEST_DIR)\make
 
 LDLIBS :=	-lwxcode_msw30ud_wxsqlite3 -lsqlite3 -lwxmsw30ud_adv -lwxmsw30ud_core \
 			-lwxbase30ud -luuid -lole32 -loleaut32 -lwxregexud -lcomctl32 \
@@ -62,6 +67,10 @@ clean:
 $(BUILD_DIR)/%.o: %.cc
 	if not exist $(subst /,\,$(dir $@)) mkdir $(subst /,\,$(dir $@))	
 	$(CXX) -c -o $@ $(CPPFLAGS) $<
+
+test: $(OBJS) $(TEST_OBJS)
+	$(CXX) -o $(BUILD_DIR)\$@ $(LDFLAGS) $? $(LDLIBS) -lgtest
+	$(BUILD_DIR)\$@
 
 gbapp: $(OBJS)
 	$(CXX) -o $(BUILD_DIR)\$@ $(LDFLAGS) $? $(LDLIBS)
