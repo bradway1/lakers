@@ -1,15 +1,17 @@
 vpath %.cc src:src\data:src\sql:tests:src\gui
 
-OBJ = gbframe.o assessment.o student.o course.o gbsql.o gbapp.o 
-TEST_OBJ = gbsqltest.o gbtest.o
-
-BUILD = debug
-
 BUILD_DIR = build
 
-OUTPUT_OBJ = $(addprefix $(BUILD_DIR)\, $(OBJ))
+SRCS := src\data\assessment.cc \
+				src\data\course.cc \
+				src\data\student.cc \
+				src\gui\gbframe.cc \
+				src\sql\gbsql.cc \
+				src\gbapp.cc
 
-APP_NAME = gbapp.exe
+OBJS := $(SRCS:%.cc=$(BUILD_DIR)/%.o)
+
+BUILD = debug
 
 WX_VER = 3.0.1
 WX_DIR = lib\wxwidgets-$(WX_VER)
@@ -35,41 +37,39 @@ SQL_TOOL = tools\sqlite3.exe
 CPPFLAGS := -Iinclude \
 						-Iinclude\data \
 						-Iinclude\sql \
-					-I$(WX_DIR)\include \
-					-I$(WX_DIR)\lib\gcc_lib\mswud \
-					-I$(WX_SQL_DIR)\include \
-					-DBUILD=$(BUILD)
+						-I$(WX_DIR)\include \
+						-I$(WX_DIR)\lib\gcc_lib\mswud \
+						-I$(WX_SQL_DIR)\include \
+						-DBUILD=$(BUILD)
 
 LDFLAGS := 	-L$(SQL_DIR)\lib \
-			-L$(WX_SQL_DIR)\lib\gcc_lib	\
-			-L$(WX_DIR)\lib\gcc_lib \
+						-L$(WX_SQL_DIR)\lib\gcc_lib	\
+						-L$(WX_DIR)\lib\gcc_lib \
 
 LDLIBS :=	-lwxcode_msw30ud_wxsqlite3 -lsqlite3 -lwxmsw30ud_adv -lwxmsw30ud_core \
 			-lwxbase30ud -luuid -lole32 -loleaut32 -lwxregexud -lcomctl32 \
 			-lgdi32 -lwxpngd -lwxzlibd -lcomdlg32 -lwinspool 
 
-OUTPUT_OPTION = -o $(BUILD_DIR)\$@
+build: setup gbapp
 
-build: setup gbapp ;
+run:
+	$(BUILD_DIR)/gbapp
 
-release: BUILD=release
-release: build
+.PHONY: clean
+clean:
+	rmdir /Q /S $(BUILD_DIR)
 
-run: build
-	$(BUILD_DIR)\$(APP_NAME)
+$(BUILD_DIR)/%.o: %.cc
+	if not exist $(subst /,\,$(dir $@)) mkdir $(subst /,\,$(dir $@))	
+	$(CXX) -c -o $@ $(CPPFLAGS) $<
 
-test: CPPFLAGS += -I$(GTEST_DIR)\include 
-test: setup build_test
-	
-build_test: $(OBJ) $(TEST_OBJ)
-	$(CXX) $(LDFLAGS) -L$(GTEST_DIR)\make $(addprefix $(BUILD_DIR)\, $^) \
-		$(LDLIBS) -lgtest -o $(BUILD_DIR)\test.exe
-	$(BUILD_DIR)\test.exe
+gbapp: $(OBJS)
+	$(CXX) -o $(BUILD_DIR)\$@ $(LDFLAGS) $? $(LDLIBS)
 
 setup: wxwidgets wxsqlite3 gtest
 
 dummy:
-	$(SQL_TOOL) build\gb.db < tests\data\gb.sql
+	$(SQL_TOOL) $(BUILD_DIR)\gb.db < tests\data\gb.sql
 
 wxwidgets:
 ifeq (,$(wildcard $(WX_DIR)))
@@ -90,6 +90,3 @@ ifeq (,$(wildcard $(GTEST_DIR)))
 	$(MAKE) -C $(GTEST_DIR)\make gtest.a
 	copy $(GTEST_DIR)\make\gtest.a $(GTEST_DIR)\make\libgtest.a
 endif
-
-gbapp: $(OBJ)
-	$(CXX) $(LDFLAGS) $(OUTPUT_OBJ) $(LDLIBS) -o $(BUILD_DIR)\$(APP_NAME)
