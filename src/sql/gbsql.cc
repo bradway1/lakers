@@ -1,6 +1,7 @@
 #include "gbsql.h"
 
 #include <iostream>
+#include <wx/string.h>
 
 using namespace std;
 
@@ -9,7 +10,7 @@ using namespace std;
 GBSql::GBSql() {
     if (InitializeDatabase()) {
 
-    } 
+    }
 }
 
 GBSql::~GBSql() {
@@ -44,14 +45,14 @@ int GBSql::InsertCourse(const Course &c) {
     return ret;
 }
 
-int GBSql::UpdateCourse(const Course &c) { 
+int GBSql::UpdateCourse(const Course &c) {
     int ret = -1;
     static const char* sqlCommand = "UPDATE courses SET \
                                      title=?1,  \
                                      start=?2,  \
                                      end=?3     \
                                      WHERE cid=?4";
-    
+
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
 
@@ -71,7 +72,7 @@ int GBSql::UpdateCourse(const Course &c) {
 int GBSql::DeleteCourse(const Course &c) {
     int ret = -1;
     static const char* sqlCommand = "DELETE FROM courses WHERE cid=?1";
-    
+
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
 
@@ -132,7 +133,7 @@ int GBSql::InsertStudent(const Student &s) {
                                      last) VALUES (?1, ?2, ?3)";
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-    
+
         smt.Bind(1, *s.GetStudentId());
         smt.Bind(2, *s.GetFirst());
         smt.Bind(3, *s.GetLast());
@@ -140,7 +141,7 @@ int GBSql::InsertStudent(const Student &s) {
         return smt.ExecuteUpdate();
     } catch (wxSQLite3Exception &e) {
         cerr << e.GetMessage() << endl;
-    
+
         return -1;
     }
 
@@ -163,7 +164,7 @@ int GBSql::UpdateStudent(const Student &s) {
         return smt.ExecuteUpdate();
     } catch (wxSQLite3Exception &e) {
         cerr << e.GetMessage() << endl;
-    
+
         return -1;
     }
 
@@ -182,7 +183,7 @@ int GBSql::DeleteStudent(const Student &s) {
         return smt.ExecuteUpdate();
     } catch (wxSQLite3Exception &e) {
         cerr << e.GetMessage() << endl;
-    
+
         return -1;
     }
 
@@ -191,7 +192,7 @@ int GBSql::DeleteStudent(const Student &s) {
 
 int GBSql::SelectStudents(vector<Student*> *sVec) {
     static const char *sqlCommand = "SELECT * FROM students";
-    
+
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
 
@@ -214,10 +215,67 @@ int GBSql::SelectStudents(vector<Student*> *sVec) {
         return sVec->size();
     } catch (wxSQLite3Exception &e) {
         cerr << e.GetMessage() << endl;
-        
+
         return -1;
     }
-    
+
+    return 0;
+}
+
+int GBSql::SelectStudentsFromCourse(vector<Student*> *sVec, wxString cid) {
+
+	wxString sqlCommand = "SELECT * FROM sc_relation WHERE cid=" + cid + " ORDER BY cid";
+	wxString sqlCommand2 = "SELECT * FROM STUDENTS WHERE sid IN (" ;
+	wxString sidStr;
+	Student *s;
+
+    try {
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+
+        wxSQLite3ResultSet r = smt.ExecuteQuery();
+
+        while (r.NextRow()) {
+
+			sidStr = r.GetString("sid") + ",";
+
+			sqlCommand2.Append(sidStr);
+        }
+
+        sqlCommand2.RemoveLast();
+        sqlCommand2.Append(") ORDER BY sid");
+
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+
+        return -1;
+    }
+
+    try{
+		wxSQLite3Statement smt2 = m_db.PrepareStatement(sqlCommand2);
+
+        wxSQLite3ResultSet rec = smt2.ExecuteQuery();
+
+        while (rec.NextRow()) {
+            s = new Student();
+
+            s->SetStudentId(rec.GetString("sid"));
+
+            s->SetFirst(rec.GetString("first"));
+
+            s->SetLast(rec.GetString("last"));
+
+            sVec->push_back(s);
+        }
+
+        return sVec->size();
+
+
+	} catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+
+        return -1;
+    }
+
     return 0;
 }
 
@@ -238,7 +296,7 @@ int GBSql::AddStudentCourseRelation(const Student &s, const Course &c) {
 
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -249,10 +307,10 @@ int GBSql::InsertAssessment(const Assessment &a) {
                                      title, \
                                      date,  \
                                      type) VALUES (?1, ?2, ?3, ?4, ?5)";
-    
+
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-    
+
         smt.Bind(1, *a.GetId());
         smt.Bind(2, *a.GetCourseId());
         smt.Bind(3, *a.GetTitle());
@@ -279,7 +337,7 @@ int GBSql::UpdateAssessment(const Assessment &a) {
                                      type=?3        \
                                      WHERE aid=?4   \
                                      AND cid=?5";
-    
+
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
 
@@ -292,17 +350,17 @@ int GBSql::UpdateAssessment(const Assessment &a) {
         return smt.ExecuteUpdate();
     } catch (wxSQLite3Exception &e) {
         cerr << e.GetMessage() << endl;
-    
+
         return -1;
     }
 
     return 0;
-}   
+}
 
 int GBSql::DeleteAssessment(const Assessment &a) {
     static const char *sqlCommand = "DELETE FROM assessments \
-                                     WHERE aid=?1 AND cid=?2";    
-    
+                                     WHERE aid=?1 AND cid=?2";
+
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
 
@@ -321,7 +379,7 @@ int GBSql::DeleteAssessment(const Assessment &a) {
 
 int GBSql::SelectAssessments(vector<Assessment*> *aVec) {
     static const char *sqlCommand = "SELECT * FROM assessments";
-    
+
     try {
         wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
 
@@ -351,7 +409,37 @@ int GBSql::SelectAssessments(vector<Assessment*> *aVec) {
         cerr << e.GetMessage() << endl;
 
         return -1;
-    }    
+    }
+
+    return 0;
+}
+
+int GBSql::SelectAssesmentFromCourse(vector<Assessment*> *aVec, wxString cid) {
+
+	wxString sqlCommand = "SELECT * FROM ASSESSMENTS WHERE cid=" + cid ;
+	Assessment *a;
+	wxDateTime date;
+	wxString::const_iterator end;
+
+    try {
+
+        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+        wxSQLite3ResultSet r = smt.ExecuteQuery();
+
+        while (r.NextRow()) {
+			a = new Assessment();
+			a->SetId(r.GetAsString("aid"));
+			a->SetCourseId(r.GetAsString("cid"));
+			a->SetTitle(r.GetAsString("title"));
+			a->SetType(static_cast<Assessment::Type>(wxAtoi(r.GetAsString("type"))));
+			date.ParseDate(r.GetAsString("date"), &end);
+			a->SetDate(date);
+            aVec->push_back(a);
+        }
+    } catch (wxSQLite3Exception &e) {
+        cerr << e.GetMessage() << endl;
+        return -1;
+    }
 
     return 0;
 }

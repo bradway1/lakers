@@ -27,6 +27,7 @@ class GBSql {
         int UpdateStudent(const Student &);
         int DeleteStudent(const Student &);
         int SelectStudents(vector<Student*> *);
+        int SelectStudentsFromCourse(vector<Student*> *sVec, wxString cid);
 
         int AddStudentCourseRelation(const Student &, const Course &);
 
@@ -34,7 +35,7 @@ class GBSql {
         int UpdateAssessment(const Assessment &);
         int DeleteAssessment(const Assessment &);
         int SelectAssessments(vector<Assessment*> *);
-
+		int SelectAssesmentFromCourse(vector<Assessment*> *aVec, wxString cid);
     private:
         wxSQLite3Database m_db;
 
