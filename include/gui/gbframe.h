@@ -15,8 +15,6 @@
 #define GBAPPSIZE wxSize(800,600)
 #define GBDIALOGSIZE wxSize(350,450)
 
-
-
 class GBFrame: public wxFrame
 {
 public:
@@ -32,6 +30,7 @@ private:
     void AssignmentSelected(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
+    void OnStudentAdd(wxCommandEvent& event);
 
 	wxBoxSizer 			*m_pCourseDropDownListSizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer 			*m_pGBFrameSizer = new wxBoxSizer(wxVERTICAL);
@@ -60,5 +59,5 @@ enum
 	ID_ModifyAssignmentToolBarButton = 6,
 	ID_GBDialogPanel = 7,
 	ID_GBDialog = 8,
-	ID_SelectAssignmentListBox = 9
+	ID_SelectAssignmentListBox = 9,
 };
