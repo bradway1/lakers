@@ -3,12 +3,18 @@ BUILD_DIR = build
 SRCS := src\data\assessment.cc \
 				src\data\course.cc \
 				src\data\student.cc \
-				src\gui\gbframe.cc \
 				src\sql\gbsql.cc \
-				src\gbapp.cc
+				src\gbapp.cc \
+				src\gui\views\gbframeView.cc \
+				src\gui\controllers\gbframeController.cc \
+				src\gui\views\gbdialogassessmentView.cc \
+				src\gui\controllers\gbdialogassessmentController.cc \
+				src\gui\views\gbdialogcourseView.cc \
+				src\gui\controllers\gbdialogcourseController.cc \
+	
 
-TEST_SRCS := tests\gbsqltest.cc \
-						 tests\gbtest.cc
+TEST_SRCS := 	tests\gbsqltest.cc \
+		tests\gbtest.cc \
 
 OBJS := $(SRCS:%.cc=$(BUILD_DIR)/%.o)
 

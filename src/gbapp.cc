@@ -6,7 +6,7 @@ IMPLEMENT_APP(GBApp)
 
 bool GBApp::OnInit() {
 
-	GBFrame *pGBBase = new GBFrame("Grade Book", wxPoint(0,0), GBAPPSIZE);
+	GBFrameView *pGBBase = new GBFrameView("Grade Book", wxPoint(0,0), GBAPPSIZE);
 	pGBBase->Show();
 	SetTopWindow(pGBBase);
 
