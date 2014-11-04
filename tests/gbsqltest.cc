@@ -1,244 +1,149 @@
 #include "gtest/gtest.h"
 
-#include "sql/gbsql.h"
-#include "data/course.h"
-
-#include <wx/filefn.h>
-
 #include <vector>
 
 using std::vector;
 
-class GBSqlTest : public ::testing::Test {
-    protected:
-        GBSql *sql;
+#include "data/course.h"
+#include "sql/gbsql.h"
 
-        virtual void SetUp() {
-            if (wxFileExists("gb.db")) {
-                wxRemoveFile("gb.db");
-            }
+class GBSqlTest : public ::testing::Test 
+{
+  protected:
+    virtual void SetUp() 
+    {
+      remove("gb.db");
+      
+      sql = GBSql::Instance();    
 
-            sql = new GBSql();
-        };
+      sql->Import("gb.db", "tests/data/gb.backup"); 
+    }
 
-        virtual void TearDown() {
-            sql->Close();
-        }
+    virtual void TearDown()
+    {
+      sql->Close(); 
+    }
+
+    GBSql *sql;
 };
 
-TEST_F(GBSqlTest, testAddCourse) {
-    Course c;
-    
-    c.SetId("1");
-    c.SetTitle("MATH-217");
-    c.SetStart(wxDateTime::Today());
-    c.SetEnd(wxDateTime::Today());
+TEST_F(GBSqlTest, SelectCourses) {
+  vector<Course*> result;
 
-    int r = sql->InsertCourse(c);
+  int r = sql->SelectCourses(&result);
 
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(2, r);
 }
 
-TEST_F(GBSqlTest, testUpdateCourse) {
-    Course c;
+TEST_F(GBSqlTest, InsertCourse) {
+  Course c("3");
 
-    c.SetId("1");
-    c.SetTitle("MATH-217");
-    c.SetStart(wxDateTime::Today());
-    c.SetEnd(wxDateTime::Today());
+  c.SetTitle("CSCI-580");
 
-    sql->InsertCourse(c);
+  int r = sql->InsertCourse(c);
 
-    c.SetTitle("CSCI-217");
-
-    int r = sql->UpdateCourse(c);
-
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(1, r);
 }
 
-TEST_F(GBSqlTest, testDeleteCourse) {
-    Course c;
-    
-    c.SetId("1");
-    c.SetTitle("MATH-217");
-    c.SetStart(wxDateTime::Today());
-    c.SetEnd(wxDateTime::Today());
+TEST_F(GBSqlTest, DeleteCourse) {
+  Course c("1");
 
-    sql->InsertCourse(c);
+  c.SetTitle("CSCI-217");
 
-    int r = sql->DeleteCourse(c);
+  int r = sql->DeleteCourse(c);
 
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(1, r);
 }
 
-TEST_F(GBSqlTest, testSelectCourse) {
-    Course c[2];
+TEST_F(GBSqlTest, SelectStudentByCourse) {
+  Course c("1");
 
-    c[0].SetId("1");
-    c[0].SetTitle("MATH-217");
-    c[0].SetStart(wxDateTime::Today());
-    c[0].SetEnd(wxDateTime::Today());
+  c.SetTitle("CSCI-217");
 
-    c[1].SetId("2");
-    c[1].SetTitle("CSCI-217");
-    c[1].SetStart(wxDateTime::Today());
-    c[1].SetEnd(wxDateTime::Today());
+  int r = sql->SelectStudentsByCourse(c);
 
-    sql->InsertCourse(c[0]);
-
-    sql->InsertCourse(c[1]);
-
-    vector<Course*> result;
-
-    int r = sql->SelectCourse(&result);
-
-    ASSERT_EQ(2, r);
-
-    for (int i = 0; i < r; ++i) {
-        ASSERT_STREQ(c[i].GetId()->fn_str(), result[i]->GetId()->fn_str());
-    }
+  ASSERT_EQ(32, r);
 }
 
-TEST_F(GBSqlTest, testInsertStudent) {
-    Student s;
+TEST_F(GBSqlTest, InsertStudentIntoCourse) {
+  Student s("82098310928");
 
-    s.SetStudentId("1");
-    s.SetFirst("John");
-    s.SetLast("Doe");
+  s.SetFirst("Joe");
+  s.SetLast("Montana");
 
-    int r = sql->InsertStudent(s);
+  Course c("1");
 
-    ASSERT_EQ(1, r);
+  int r = sql->InsertStudentIntoCourse(s, c);
+
+  ASSERT_EQ(1, r);
 }
 
-TEST_F(GBSqlTest, testUpdateStudent) {
-    Student s;
+TEST_F(GBSqlTest, DeleteStudent) {
+  Student s("0");
 
-    s.SetStudentId("1");
-    s.SetFirst("John");
-    s.SetLast("Doe");
+  int r = sql->DeleteStudent(s);
 
-    sql->InsertStudent(s);
-
-    s.SetFirst("Jimmy");
-
-    int r = sql->UpdateStudent(s);
-
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(1, r);
 }
 
-TEST_F(GBSqlTest, testDeleteStudent) {
-    Student s;
+TEST_F(GBSqlTest, SelectAssessmentsByCourse) {
+  Course c("1");
 
-    s.SetStudentId("1");
-    s.SetFirst("John");
-    s.SetLast("Doe");
+  int r = sql->SelectAssessmentsByCourse(c);
 
-    sql->InsertStudent(s);
-
-    int r = sql->DeleteStudent(s);
-
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(20, r);
 }
 
-TEST_F(GBSqlTest, testSelectStudent) {
-    Student s[2];
+TEST_F(GBSqlTest, InsertAssessmentIntoCourse) {
+  Assessment a;
 
-    s[0].SetStudentId("1");
-    s[0].SetFirst("John");
-    s[0].SetLast("Doe");
+  a.SetTitle("Test 1");
 
-    s[1].SetStudentId("2");
-    s[1].SetFirst("Helen");
-    s[1].SetLast("Doe");
+  Course c("1");
 
-    for (int i = 0; i < 2; ++i) {
-        sql->InsertStudent(s[i]);
-    }
+  int r = sql->InsertAssessmentIntoCourse(a, c);
 
-    vector<Student*> sVec;
-
-    int r = sql->SelectStudents(&sVec);
-
-    ASSERT_EQ(2, r);
+  ASSERT_EQ(1, r);
 }
 
-TEST_F(GBSqlTest, testAddSCRelation) {
-    Student s;
+TEST_F(GBSqlTest, DeleteAssessment) {
+  Assessment a("1");
 
-    s.SetStudentId("1");
-    s.SetFirst("John");
-    s.SetLast("Doe");
+  int r = sql->DeleteAssessment(a);
 
-    Course c;
-
-    c.SetId("1");
-    c.SetTitle("MATH-217");
-    c.SetStart(wxDateTime::Today());
-    c.SetEnd(wxDateTime::Today());
-
-    int r = sql->AddStudentCourseRelation(s, c);
-
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(1, r);
 }
 
-TEST_F(GBSqlTest, testInsertAssessment) {
-    Assessment a;
+TEST_F(GBSqlTest, SelectGradesForStudentInCourse) {
+  Student s("0");
 
-    a.SetId("1");
-    a.SetCourseId("MATH-217");
-    a.SetTitle("Test1");
-    a.SetDate(wxDateTime::Today());
+  Course c("1");
 
-    int r = sql->InsertAssessment(a);
+  int r = sql->SelectGradesForStudentInCourse(s, c);
 
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(20, r);
 }
 
-TEST_F(GBSqlTest, testUpdateAssessment) {
-     Assessment a;
+TEST_F(GBSqlTest, InsertGradeForStudent) {
+  Grade g;
 
-    a.SetId("1");
-    a.SetCourseId("MATH-217");
-    a.SetTitle("Test1");
-    a.SetDate(wxDateTime::Today());
+  g.SetValue("100");
 
-    sql->InsertAssessment(a);
+  Student s("0");
 
-    a.SetTitle("Test2");
+  Course c("1");
 
-    int r = sql->UpdateAssessment(a);
+  Assessment a("100");
 
-    ASSERT_EQ(1, r);   
+  int r = sql->InsertGradeForStudent(g, s, c, a);
+
+  ASSERT_EQ(1, r);
 }
 
-TEST_F(GBSqlTest, testDeleteAssessment) {
-    Assessment a;
+TEST_F(GBSqlTest, DeleteGrade) {
+  Grade g("1");
 
-    a.SetId("1");
-    a.SetCourseId("MATH-217");
-    a.SetTitle("Test1");
-    a.SetDate(wxDateTime::Today());
+  int r = sql->DeleteGrade(g);
 
-    sql->InsertAssessment(a);
-
-    int r = sql->DeleteAssessment(a);
-
-    ASSERT_EQ(1, r);
-}
-
-TEST_F(GBSqlTest, testSelectAssessments) {
-    Assessment a;
-    vector<Assessment*> aVec;
-
-    a.SetId("1");
-    a.SetCourseId("MATH-217");
-    a.SetTitle("Test1");
-    a.SetDate(wxDateTime::Today());
-
-    sql->InsertAssessment(a);
-
-    int r = sql->SelectAssessments(&aVec);
-
-    ASSERT_EQ(1, r);
+  ASSERT_EQ(1, r);
 }

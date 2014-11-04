@@ -5,484 +5,259 @@
 
 using namespace std;
 
-#include <wx\wxsqlite3.h>
+GBSql *GBSql::m_pInstance = NULL;
 
 GBSql::GBSql() {
-    if (InitializeDatabase()) {
 
+}
+
+GBSql *GBSql::Instance() {
+  if (!m_pInstance) {
+    m_pInstance = new GBSql;
+  }
+
+  return m_pInstance;
+}
+
+int GBSql::Update(const wxString &sql) {
+  try {
+    return m_db.ExecuteUpdate(sql);
+  } catch (wxSQLite3Exception &e) {
+    cerr << e.GetMessage() << endl;
+    
+    return -1;
+  }
+}
+
+wxSQLite3ResultSet *GBSql::Query(const wxString &sql) {
+  try {
+    return new wxSQLite3ResultSet(m_db.ExecuteQuery(sql));
+  } catch (wxSQLite3Exception &e) {
+    cerr << e.GetMessage() << endl;
+
+    return NULL;
+  }
+}
+
+int GBSql::Initialize(const wxString &file) {
+  static char tables[5][1024] = {
+    "CREATE TABLE IF NOT EXISTS students (\
+      id integer primary key, \
+      sid text not null unique, \
+      first text not null, \
+      last text not null)",
+    "CREATE TABLE IF NOT EXISTS courses ( \
+      id integer primary key, \
+      title text not null)",
+    "CREATE TABLE IF NOT EXISTS assessments ( \
+      id integer primary key, \
+      title text not null, \
+      cid text not null)",
+    "CREATE TABLE IF NOT EXISTS grades ( \
+      id integer primary key, \
+      sid text not null, \
+      cid text not null, \
+      aid text not null, \
+      value text not null)",
+    "CREATE TABLE IF NOT EXISTS course_student (\
+      id integer primary key, \
+      sid text not null, \
+      cid text not null)",
+  };  
+
+  if (Open(file)) {
+    cerr << "Error opening database: " << file << endl;
+
+    return 1;
+  }
+
+  for (int i = 0; i < 5; ++i) {
+    if (Update(tables[i]) == -1) {
+      cerr << "Failed to create table" << endl;
+
+      return 1;
     }
+  }
+
+  return 0;
 }
 
-GBSql::~GBSql() {
-
+int GBSql::Open(const wxString &file) {
+  try {
+    m_db.Open(file);
+  
+    return 0; 
+  } catch (wxSQLite3Exception &e) {
+    cerr << e.GetMessage() << endl; 
+    
+    return 1;
+  }
 }
 
-void GBSql::Close() {
+int GBSql::Close() {
+  try {
     m_db.Close();
+
+    return 0;
+  } catch (wxSQLite3Exception &e) {
+    cerr << e.GetMessage() << endl;
+
+    return 1;
+  }
+}
+
+int GBSql::Import(const wxString &file, const wxString &backup) {
+  if (Open(file)) {
+    return 1;
+  } 
+  
+  try { 
+    m_db.Restore(backup);
+  
+    return 0; 
+  } catch (wxSQLite3Exception &e) {
+    cerr << e.GetMessage() << endl;
+
+    return 1;
+  }
+}
+
+int GBSql::SelectCourses(vector<Course*> *result) {
+  wxString sql = wxString::Format("SELECT * FROM courses");
+
+  Course *c;
+  wxSQLite3ResultSet *r = Query(sql);
+
+  while (r->NextRow()) {
+    c = new Course(r->GetAsString("id"));
+
+    c->SetTitle(r->GetAsString("title"));
+
+    result->push_back(c);
+  }
+  
+  return result->size();
 }
 
 int GBSql::InsertCourse(const Course &c) {
-    int ret = -1;
-    static const char* sqlCommand = "INSERT INTO courses (\
-                                    cid,    \
-                                    title,  \
-                                    start,  \
-                                    end) VALUES (?1, ?2, ?3, ?4)";
+  wxString sql = wxString::Format("INSERT INTO courses \
+      VALUES (NULL, '%s')", c.Title());
 
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *c.GetId());
-        smt.Bind(2, *c.GetTitle());
-        smt.Bind(3, c.GetStart()->Format("%x"));
-        smt.Bind(4, c.GetEnd()->Format("%x"));
-
-        ret = smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cout << e.GetMessage() << endl;
-    }
-
-    return ret;
-}
-
-int GBSql::UpdateCourse(const Course &c) {
-    int ret = -1;
-    static const char* sqlCommand = "UPDATE courses SET \
-                                     title=?1,  \
-                                     start=?2,  \
-                                     end=?3     \
-                                     WHERE cid=?4";
-
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *c.GetTitle());
-        smt.Bind(2, c.GetStart()->Format("%x"));
-        smt.Bind(3, c.GetEnd()->Format("%x"));
-        smt.Bind(4, *c.GetId());
-
-        ret = smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cout << e.GetMessage() << endl;
-    }
-
-    return ret;
+  return Update(sql);
 }
 
 int GBSql::DeleteCourse(const Course &c) {
-    int ret = -1;
-    static const char* sqlCommand = "DELETE FROM courses WHERE cid=?1";
+  wxString sql = wxString::Format("DELETE FROM courses \
+      WHERE title='%s'", c.Title());
 
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *c.GetId());
-
-        ret = smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cout << e.GetMessage() << endl;
-    }
-
-    return ret;
+  return Update(sql);
 }
 
-int GBSql::SelectCourse(vector<Course*> *cVec) {
-    int ret = -1;
+int GBSql::SelectStudentsByCourse(Course &c) {
+  wxString sql = wxString::Format("SELECT students.sid, first, last \
+     FROM students \
+     INNER JOIN course_student \
+     ON students.sid=course_student.sid \
+     WHERE course_student.cid='%s'", c.Id());
 
-    static const char* sqlCommand = "SELECT * FROM courses";
+  Student *s;
+  wxSQLite3ResultSet *r = Query(sql);
 
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+  while (r->NextRow()) {
+    s = new Student(r->GetAsString("sid"));
+    
+    s->SetFirst(r->GetAsString("first"));
+    s->SetLast(r->GetAsString("last"));
 
-        wxSQLite3ResultSet r = smt.ExecuteQuery();
-
-        Course *c;
-        wxDateTime date;
-        wxString::const_iterator end;
-
-        while (r.NextRow()) {
-            c = new Course();
-
-            c->SetId(r.GetAsString("cid"));
-
-            c->SetTitle(r.GetAsString("title"));
-
-            date.ParseFormat(r.GetAsString("start"), "%x", &end);
-
-            c->SetStart(date);
-
-            date.ParseFormat(r.GetAsString("end"), "%x", &end);
-
-            c->SetEnd(date);
-
-            cVec->push_back(c);
-        }
-
-        ret = cVec->size();
-    } catch (wxSQLite3Exception &e) {
-        cout << e.GetMessage() << endl;
-    }
-
-    return ret;
+    c.AddStudent(s);
+  }
+  
+  return c.StudentCount();
 }
 
-int GBSql::InsertStudent(const Student &s) {
-    static const char *sqlCommand = "INSERT INTO students (\
-                                     sid,       \
-                                     first,     \
-                                     last) VALUES (?1, ?2, ?3)";
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+int GBSql::InsertStudentIntoCourse(const Student &s, const Course &c) {
+  wxString sql = wxString::Format("INSERT INTO students \
+      VALUES (NULL, '%s', '%s', '%s')", s.Id(), s.First(), s.Last());
 
-        smt.Bind(1, *s.GetStudentId());
-        smt.Bind(2, *s.GetFirst());
-        smt.Bind(3, *s.GetLast());
+  if (Update(sql) == -1) {
+    return -1;
+  }
 
-        return smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
+  sql = wxString::Format("INSERT INTO course_student \
+      VALUES (NULL, '%s', '%s')", s.Id(), c.Id());
 
-        return -1;
-    }
-
-    return 0;
-}
-
-int GBSql::UpdateStudent(const Student &s) {
-    static const char *sqlCommand = "UPDATE students SET \
-                                     first=?1,  \
-                                     last=?2    \
-                                     WHERE sid=?3";
-
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *s.GetFirst());
-        smt.Bind(2, *s.GetLast());
-        smt.Bind(3, *s.GetStudentId());
-
-        return smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
+  return Update(sql);
 }
 
 int GBSql::DeleteStudent(const Student &s) {
-    static const char *sqlCommand = "DELETE FROM students \
-                                     WHERE sid=?1";
+  wxString sql = wxString::Format("DELETE FROM students \
+      WHERE sid='%s'", s.Id());
 
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *s.GetStudentId());
-
-        return smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
+  return Update(sql);
 }
 
-int GBSql::SelectStudents(vector<Student*> *sVec) {
-    static const char *sqlCommand = "SELECT * FROM students";
+int GBSql::SelectAssessmentsByCourse(Course &c) {
+  wxString sql = wxString::Format("SELECT * FROM assessments \
+      WHERE cid='%s'", c.Id());
 
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+  Assessment *a;
+  wxSQLite3ResultSet *r = Query(sql);
 
-        wxSQLite3ResultSet r = smt.ExecuteQuery();
+  while (r->NextRow()) {
+    a = new Assessment(r->GetAsString("id"));
 
-        Student *s;
+    a->SetTitle(r->GetAsString("title"));
 
-        while (r.NextRow()) {
-            s = new Student();
+    c.AddAssessment(a);
+  }
 
-            s->SetStudentId(r.GetString("sid"));
-
-            s->SetFirst(r.GetString("first"));
-
-            s->SetLast(r.GetString("last"));
-
-            sVec->push_back(s);
-        }
-
-        return sVec->size();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
+  return c.AssessmentCount();
 }
 
-int GBSql::SelectStudentsFromCourse(vector<Student*> *sVec, wxString cid) {
+int GBSql::InsertAssessmentIntoCourse(const Assessment &a, const Course &c) {
+  wxString sql = wxString::Format("INSERT INTO assessments \
+      VALUES (NULL, '%s', '%s')", a.Title(), c.Id());
 
-	wxString sqlCommand = "SELECT * FROM sc_relation WHERE cid=" + cid + " ORDER BY cid";
-	wxString sqlCommand2 = "SELECT * FROM STUDENTS WHERE sid IN (" ;
-	wxString sidStr;
-	Student *s;
-
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        wxSQLite3ResultSet r = smt.ExecuteQuery();
-
-        while (r.NextRow()) {
-
-			sidStr = r.GetString("sid") + ",";
-
-			sqlCommand2.Append(sidStr);
-        }
-
-        sqlCommand2.RemoveLast();
-        sqlCommand2.Append(") ORDER BY sid");
-
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    try{
-		wxSQLite3Statement smt2 = m_db.PrepareStatement(sqlCommand2);
-
-        wxSQLite3ResultSet rec = smt2.ExecuteQuery();
-
-        while (rec.NextRow()) {
-            s = new Student();
-
-            s->SetStudentId(rec.GetString("sid"));
-
-            s->SetFirst(rec.GetString("first"));
-
-            s->SetLast(rec.GetString("last"));
-
-            sVec->push_back(s);
-        }
-
-        return sVec->size();
-
-
-	} catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
-}
-
-int GBSql::AddStudentCourseRelation(const Student &s, const Course &c) {
-    static const char *sqlCommand = "INSERT INTO sc_relation (\
-                                     sid, \
-                                     cid) VALUES (?1, ?2)";
-
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *c.GetId());
-        smt.Bind(2, *s.GetStudentId());
-
-        return smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
-}
-
-int GBSql::InsertAssessment(const Assessment &a) {
-    static const char *sqlCommand = "INSERT INTO assessments (\
-                                     aid,   \
-                                     cid,   \
-                                     title, \
-                                     date,  \
-                                     type) VALUES (?1, ?2, ?3, ?4, ?5)";
-
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *a.GetId());
-        smt.Bind(2, *a.GetCourseId());
-        smt.Bind(3, *a.GetTitle());
-        smt.Bind(4, a.GetDate()->FormatDate());
-
-        Assessment::Type type = a.GetType();
-
-        smt.Bind(5, wxString::Format("%i", type));
-
-        return smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
-}
-
-int GBSql::UpdateAssessment(const Assessment &a) {
-    static const char *sqlCommand = "UPDATE assessments SET \
-                                     title=?1,      \
-                                     date=?2,       \
-                                     type=?3        \
-                                     WHERE aid=?4   \
-                                     AND cid=?5";
-
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *a.GetTitle());
-        smt.Bind(2, a.GetDate()->FormatDate());
-        smt.Bind(3, wxString::Format("%i", a.GetType()));
-        smt.Bind(4, *a.GetId());
-        smt.Bind(5, *a.GetCourseId());
-
-        return smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
+  return Update(sql);
 }
 
 int GBSql::DeleteAssessment(const Assessment &a) {
-    static const char *sqlCommand = "DELETE FROM assessments \
-                                     WHERE aid=?1 AND cid=?2";
+  wxString sql = wxString::Format("DELETE FROM assessments \
+     WHERE id='%s'", a.Id());
 
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-
-        smt.Bind(1, *a.GetId());
-        smt.Bind(2, *a.GetCourseId());
-
-        return smt.ExecuteUpdate();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
+  return Update(sql);
 }
 
-int GBSql::SelectAssessments(vector<Assessment*> *aVec) {
-    static const char *sqlCommand = "SELECT * FROM assessments";
+int GBSql::SelectGradesForStudentInCourse(Student &s, const Course &c) {
+  wxString sql = wxString::Format("SELECT * FROM grades \
+      WHERE sid='%s' AND cid='%s'", s.Id(), c.Id());
 
-    try {
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
+  Grade *g;
+  wxSQLite3ResultSet *r = Query(sql);
 
-        wxSQLite3ResultSet r = smt.ExecuteQuery();
+  while (r->NextRow()) {
+    g = new Grade(r->GetAsString("id"));
 
-        Assessment *a;
-        wxDateTime date;
-        wxString::const_iterator end;
+    g->SetValue(r->GetAsString("value"));
+    g->SetAssessmentId(r->GetAsString("aid"));
 
-        while (r.NextRow()) {
-            a = new Assessment();
+    s.AddGrade(g);
+  }
 
-            a->SetId(r.GetAsString("aid"));
-            a->SetCourseId(r.GetAsString("cid"));
-            a->SetTitle(r.GetAsString("title"));
-            a->SetType(static_cast<Assessment::Type>(wxAtoi(r.GetAsString("type"))));
-
-            date.ParseDate(r.GetAsString("date"), &end);
-
-            a->SetDate(date);
-
-            aVec->push_back(a);
-        }
-
-        return aVec->size();
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-
-        return -1;
-    }
-
-    return 0;
+  return s.GradeCount();
 }
 
-int GBSql::SelectAssesmentFromCourse(vector<Assessment*> *aVec, wxString cid) {
-
-	wxString sqlCommand = "SELECT * FROM ASSESSMENTS WHERE cid=" + cid ;
-	Assessment *a;
-	wxDateTime date;
-	wxString::const_iterator end;
-
-    try {
-
-        wxSQLite3Statement smt = m_db.PrepareStatement(sqlCommand);
-        wxSQLite3ResultSet r = smt.ExecuteQuery();
-
-        while (r.NextRow()) {
-			a = new Assessment();
-			a->SetId(r.GetAsString("aid"));
-			a->SetCourseId(r.GetAsString("cid"));
-			a->SetTitle(r.GetAsString("title"));
-			a->SetType(static_cast<Assessment::Type>(wxAtoi(r.GetAsString("type"))));
-			date.ParseDate(r.GetAsString("date"), &end);
-			a->SetDate(date);
-            aVec->push_back(a);
-        }
-    } catch (wxSQLite3Exception &e) {
-        cerr << e.GetMessage() << endl;
-        return -1;
-    }
-
-    return 0;
+int GBSql::InsertGradeForStudent(const Grade &g, const Student &s, const Course &c, const Assessment &a) {
+  wxString sql = wxString::Format("INSERT INTO grades \
+      VALUES (NULL, '%s', '%s', '%s', '%s')", \
+      s.Id(), c.Id(), a.Id(), g.Value());
+  
+  return Update(sql);
 }
 
-bool GBSql::InitializeDatabase() {
-    const char* sqlCommands[] = {
-        "CREATE TABLE IF NOT EXISTS courses (\
-            cid     TEXT    not null, \
-            title   TEXT    not null, \
-            start   TEXT    not null, \
-            end     TEXT    not null, \
-            primary key(cid))",
-        "CREATE TABLE IF NOT EXISTS students (\
-            sid     TEXT    not null, \
-            first   TEXT    not null, \
-            last    TEXT    not null, \
-            primary key(sid))",
-        "CREATE TABLE IF NOT EXISTS sc_relation (\
-            id      INTEGER PRIMARY KEY AUTOINCREMENT, \
-            sid     TEXT    not null, \
-            cid     TEXT    not null)",
-        "CREATE TABLE IF NOT EXISTS assessments (\
-            aid     TEXT    not null, \
-            cid     TEXT    not null, \
-            title   TEXT    not null, \
-            date    TEXT    not null, \
-            type    TEXT    not null, \
-            primary key(aid))",
-        NULL };
-
-    int i = 0;
-
-    try {
-        m_db.Open(wxT("gb.db"));
-
-        while (sqlCommands[i] != NULL) {
-            m_db.ExecuteUpdate(sqlCommands[i++]);
-        }
-    } catch (wxSQLite3Exception &e) {
-        cout << e.GetMessage() << endl;
-
-        return false;
-    }
-
-    return true;
+int GBSql::DeleteGrade(const Grade &g) {
+  wxString sql = wxString::Format("DELETE FROM grades \
+     WHERE id='%s'", g.Id()); 
+  
+  return Update(sql);
 }

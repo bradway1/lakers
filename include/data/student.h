@@ -1,25 +1,36 @@
 #ifndef _STUDENT_H
 #define _STUDENT_H
 
-#include <wx\string.h>
+#include <vector>
+
+using std::vector;
+
+#include <wx/string.h>
+
+#include "data/grade.h"
 
 class Student {
-    public:
-        Student();
-        ~Student();
-        
-        void SetStudentId(const wxString &);
-        void SetFirst(const wxString &);
-        void SetLast(const wxString &);
+  public:
+    Student();
+    Student(const wxString &id);
+    ~Student();
 
-        wxString *GetStudentId() const;
-        wxString *GetFirst() const;
-        wxString *GetLast() const;
+    wxString &Id() const { return *m_pId; }
+    wxString &First() const { return *m_pFirst; }
+    wxString &Last() const { return *m_pLast; }
 
-    private:
-        wxString *m_pStudentId;
-        wxString *m_pFirst;
-        wxString *m_pLast;
+    void SetFirst(const wxString &first) { m_pFirst = new wxString(first); }
+    void SetLast(const wxString &last) { m_pLast = new wxString(last); }
+
+    void AddGrade(Grade *grade);
+    Grade &GetGrade(int index) const;
+    int GradeCount();
+
+  private:
+    wxString *m_pId; 
+    wxString *m_pFirst;
+    wxString *m_pLast;
+    vector<Grade*> m_grades;
 };
 
 #endif

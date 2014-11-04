@@ -1,45 +1,56 @@
 #ifndef _GBSQL_H
 #define _GBSQL_H
 
-#include "data/course.h"
-#include "data/student.h"
-#include "data/assessment.h"
-
-#include <wx/wxsqlite3.h>
-
 #include <vector>
 
 using std::vector;
 
+#include <wx/wxsqlite3.h>
+
+#include "data/course.h"
+#include "data/student.h"
+#include "data/assessment.h"
+
 class GBSql {
-    public:
-        GBSql();
-        ~GBSql();
+  public:
+    static GBSql *Instance();
 
-        void Close();
+    int Initialize(const wxString &file);
 
-        int InsertCourse(const Course &);
-        int UpdateCourse(const Course &);
-        int DeleteCourse(const Course &);
-        int SelectCourse(vector<Course*> *);
+    int Open(const wxString &file);
+    int Close();
+   
+    int Import(const wxString &file, const wxString &backup); 
+  
+    int SelectCourses(vector<Course*> *result);  
+    int InsertCourse(const Course &c);
+    int DeleteCourse(const Course &c);
 
-        int InsertStudent(const Student &);
-        int UpdateStudent(const Student &);
-        int DeleteStudent(const Student &);
-        int SelectStudents(vector<Student*> *);
-        int SelectStudentsFromCourse(vector<Student*> *sVec, wxString cid);
+    int SelectStudentsByCourse(Course &c);
+    int InsertStudent(const Student &s);
+    int InsertStudentIntoCourse(const Student &s, const Course &c);
+    int DeleteStudent(const Student &s);
 
-        int AddStudentCourseRelation(const Student &, const Course &);
+    int SelectAssessmentsByCourse(Course &c);
+    int InsertAssessmentIntoCourse(const Assessment &a, const Course &c);
+    int DeleteAssessment(const Assessment &a);
 
-        int InsertAssessment(const Assessment &);
-        int UpdateAssessment(const Assessment &);
-        int DeleteAssessment(const Assessment &);
-        int SelectAssessments(vector<Assessment*> *);
-		int SelectAssesmentFromCourse(vector<Assessment*> *aVec, wxString cid);
-    private:
-        wxSQLite3Database m_db;
+    int SelectGradesForStudentInCourse(Student &s, const Course &c);
+    int InsertGradeForStudent(const Grade &g, const Student &s, const Course &c, const Assessment &a);
+    int DeleteGrade(const Grade &g);
 
-        bool InitializeDatabase();
+  private:
+    GBSql();
+
+    GBSql(GBSql const &) { };
+    GBSql& operator=(GBSql const&) { };
+
+    int Update(const wxString &sql);
+    wxSQLite3ResultSet *Query(const wxString &sql);
+
+    static GBSql *m_pInstance;
+
+    wxSQLite3Database m_db;
 };
 
 #endif

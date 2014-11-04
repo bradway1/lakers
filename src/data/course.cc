@@ -1,41 +1,46 @@
 #include "data/course.h"
 
-Course::Course() {
+Course::Course()
+  : m_pId(NULL),
+    m_pTitle(NULL),
+    m_students(),
+    m_assessments() {
+
+}
+
+Course::Course(const wxString &id)
+  : m_pId(new wxString(id)),
+    m_pTitle(NULL),
+    m_students(),
+    m_assessments() {
 
 }
 
 Course::~Course() {
-
+  delete m_pId;
+  delete m_pTitle;
 }
 
-void Course::SetId(const wxString &id) {
-    m_pId = new wxString(id);
+void Course::AddStudent(Student *student) {
+  m_students.push_back(student);
 }
 
-void Course::SetTitle(const wxString &title) {
-    m_pTitle = new wxString(title);
+Student &Course::GetStudent(int index) const {
+  return *m_students[index];
 }
 
-void Course::SetStart(const wxDateTime &start) {
-    m_pStart = new wxDateTime(start);
+int Course::StudentCount() {
+  return m_students.size();
 }
 
-void Course::SetEnd(const wxDateTime &end) {
-    m_pEnd = new wxDateTime(end);
+void Course::AddAssessment(Assessment *assessment) {
+  m_assessments.push_back(assessment);
 }
 
-wxString *Course::GetId() const {
-    return m_pId;
+Assessment &Course::GetAssessment(int index) const {
+  return *m_assessments[index];
 }
 
-wxString *Course::GetTitle() const {
-    return m_pTitle;
-}
-
-wxDateTime *Course::GetStart() const {
-    return m_pStart;
-}
-
-wxDateTime *Course::GetEnd() const {
-    return m_pEnd;
+int Course::AssessmentCount() {
+  return m_assessments.size();
 }

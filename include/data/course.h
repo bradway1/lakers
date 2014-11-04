@@ -1,28 +1,39 @@
 #ifndef _COURSE_H
 #define _COURSE_H
 
-#include <wx/datetime.h>
+#include <vector>
+
+using std::vector;
+
+#include <wx/string.h>
+
+#include "data/student.h"
+#include "data/assessment.h"
 
 class Course {
-    public:
-        Course();
-        ~Course();
+  public:
+    Course(); 
+    Course(const wxString &id);
+    ~Course();
 
-        void SetId(const wxString &);
-        void SetTitle(const wxString &);
-        void SetStart(const wxDateTime &);
-        void SetEnd(const wxDateTime &);
+    wxString &Id() const { return *m_pId; }
+    wxString &Title() const { return *m_pTitle; }
 
-        wxString *GetId() const;
-        wxString *GetTitle() const;
-        wxDateTime *GetStart() const;
-        wxDateTime *GetEnd() const;
+    void SetTitle(const wxString &title) { m_pTitle = new wxString(title); }
 
-    private:
-        wxString *m_pId;
-        wxString *m_pTitle;
-        wxDateTime *m_pStart;
-        wxDateTime *m_pEnd;
+    void AddStudent(Student *student);
+    Student &GetStudent(int index) const;
+    int StudentCount();
+
+    void AddAssessment(Assessment *assessment);
+    Assessment &GetAssessment(int index) const;
+    int AssessmentCount();
+
+  private:
+    wxString *m_pId;
+    wxString *m_pTitle;  
+    vector<Student*> m_students;
+    vector<Assessment*> m_assessments;
 };
 
 #endif

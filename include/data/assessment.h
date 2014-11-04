@@ -1,38 +1,22 @@
 #ifndef _ASSESSMENT_H
 #define _ASSESSMENT_H
 
-#include <wx\string.h>
-#include <wx\datetime.h>
+#include <wx/string.h>
 
 class Assessment {
-    public:
-        enum Type : int {
-            TEST,
-            PROJECT,
-            HOMEWORK
-        };
-        
-        Assessment();
-        ~Assessment();
+  public:
+    Assessment();
+    Assessment(const wxString &id);
+    ~Assessment();
 
-        void SetId(const wxString &);
-        void SetCourseId(const wxString &);
-        void SetTitle(const wxString &);
-        void SetDate(const wxDateTime &);
-        void SetType(Assessment::Type);
+    wxString &Id() const { return *m_pId; }
+    wxString &Title() const { return *m_pTitle; }
 
-        wxString *GetId() const;
-        wxString *GetCourseId() const;
-        wxString *GetTitle() const;
-        wxDateTime *GetDate() const;
-        Assessment::Type GetType() const;
+    void SetTitle(const wxString &title) { m_pTitle = new wxString(title); }
 
-    private:
-        wxString *m_pId;
-        wxString *m_pCid;
-        wxString *m_pTitle;
-        wxDateTime *m_pDate;
-        Assessment::Type m_type;
+  private:
+    wxString *m_pId;
+    wxString *m_pTitle;
 };
 
 #endif

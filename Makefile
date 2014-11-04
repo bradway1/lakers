@@ -1,8 +1,10 @@
 BUILD_DIR = build
 
-SRCS := src\data\assessment.cc \
-				src\data\course.cc \
+SRCS := src\data\grade.cc \
+				src\data\assessment.cc \
 				src\data\student.cc \
+				src\data\course.cc \
+				src\gui\gbframe.cc \
 				src\sql\gbsql.cc \
 				src\gbapp.cc \
 				src\gui\views\gbframeView.cc \
