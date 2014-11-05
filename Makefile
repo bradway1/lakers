@@ -4,6 +4,8 @@ SRCS := src\data\grade.cc \
 				src\data\assessment.cc \
 				src\data\student.cc \
 				src\data\course.cc \
+				src\data\subscriber.cc \
+				src\data\observer.cc \
 				src\sql\gbsql.cc \
 				src\gbapp.cc \
 				src\gui\views\gbframeView.cc \
@@ -12,7 +14,6 @@ SRCS := src\data\grade.cc \
 				src\gui\controllers\gbdialogassessmentController.cc \
 				src\gui\views\gbdialogcourseView.cc \
 				src\gui\controllers\gbdialogcourseController.cc \
-	
 
 TEST_SRCS := 	tests\gbsqltest.cc \
 		tests\gbtest.cc \

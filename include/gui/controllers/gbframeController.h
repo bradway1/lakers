@@ -18,27 +18,28 @@ class GBFrameView;
 
 class GBFrameController
 {
-public:
+  public:
     GBFrameController(GBFrameView *view);
-	// Events
+    // Events
     void AddCourse(wxCommandEvent& event);
     void ModifyAssignments(wxCommandEvent& event);
     void AssignmentSelected(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void NewCourseSelected(wxCommandEvent& event);
+  
+    
 
-private:
-
-	void PopulateCourseDropDownList();
-	void CreateGridView();
-  void UpdateGridView();
+  private:
+    void PopulateCourseDropDownList();
+    void CreateGridView();
+    void UpdateGridView();
 
     GBSql *m_pSql;
     GBFrameView 				*m_pMainFrameView;
     GBDialogAssessmentView		*m_pDialogAssessmentView;
-	GBDialogCourseView			*m_pDialogCourse;
-  vector<Course*> m_courses;
+    GBDialogCourseView			*m_pDialogCourse;
+    vector<Course*> m_courses;
 };
 
 

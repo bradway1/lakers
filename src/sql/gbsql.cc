@@ -143,7 +143,11 @@ int GBSql::InsertCourse(const Course &c) {
   wxString sql = wxString::Format("INSERT INTO courses \
       VALUES (NULL, '%s')", c.Title());
 
-  return Update(sql);
+  int r = Update(sql);
+
+  NotifyCourseUpdate(); 
+
+  return r;
 }
 
 int GBSql::DeleteCourse(const Course &c) {
@@ -186,7 +190,11 @@ int GBSql::InsertStudentIntoCourse(const Student &s, const Course &c) {
   sql = wxString::Format("INSERT INTO course_student \
       VALUES (NULL, '%s', '%s')", s.Id(), c.Id());
 
-  return Update(sql);
+  int r = Update(sql);
+
+  NotifyStudentUpdate();
+
+  return r;
 }
 
 int GBSql::DeleteStudent(const Student &s) {
@@ -218,7 +226,11 @@ int GBSql::InsertAssessmentIntoCourse(const Assessment &a, const Course &c) {
   wxString sql = wxString::Format("INSERT INTO assessments \
       VALUES (NULL, '%s', '%s')", a.Title(), c.Id());
 
-  return Update(sql);
+  int r = Update(sql);
+
+  NotifyAssessmentUpdate();
+
+  return r;
 }
 
 int GBSql::DeleteAssessment(const Assessment &a) {
@@ -252,7 +264,11 @@ int GBSql::InsertGradeForStudent(const Grade &g, const Student &s, const Course 
       VALUES (NULL, '%s', '%s', '%s', '%s')", \
       s.Id(), c.Id(), a.Id(), g.Value());
   
-  return Update(sql);
+  int r = Update(sql);
+
+  NotifyGradeUpdate();
+
+  return r;
 }
 
 int GBSql::DeleteGrade(const Grade &g) {

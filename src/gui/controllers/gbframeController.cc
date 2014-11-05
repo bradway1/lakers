@@ -9,7 +9,9 @@ using namespace std;
 GBFrameController::GBFrameController(GBFrameView *view)
   : m_pMainFrameView(view),
     m_pSql(GBSql::Instance()) {
+
 	PopulateCourseDropDownList();
+  
 	CreateGridView();
 }
 

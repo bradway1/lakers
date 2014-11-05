@@ -10,8 +10,9 @@ using std::vector;
 #include "data/course.h"
 #include "data/student.h"
 #include "data/assessment.h"
+#include "data/observer.h"
 
-class GBSql {
+class GBSql : public Observer {
   public:
     static GBSql *Instance();
 
