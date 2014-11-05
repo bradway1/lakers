@@ -24,6 +24,7 @@ void GBFrameController::CreateGridView(){
 	(m_pMainFrameView->m_pGridView)->EnableDragColMove(true);
 	(m_pMainFrameView->m_pGridView)->EnableEditing(true);
 
+  UpdateGridView();
 
   (m_pMainFrameView->m_pGridView)->Refresh();
 }
@@ -32,9 +33,12 @@ void GBFrameController::UpdateGridView() {
   Course *course(NULL); 
   wxGrid *grid = m_pMainFrameView->m_pGridView;
   wxComboBox *combo = m_pMainFrameView->m_pCourseComboBox; 
-  int selection = combo->GetSelection();	
-  wxString strSelection = combo->GetString(selection);
-	
+  wxString strSelection = combo->GetStringSelection();
+
+  if (strSelection.IsEmpty() && m_courses.size() > 0) {
+    strSelection = m_courses[0]->Title();
+  }
+
   for (int i = 0; i < m_courses.size(); ++i) {
     if (m_courses[i]->Title().IsSameAs(strSelection)) {
       course = m_courses[i];
@@ -92,7 +96,9 @@ void  GBFrameController::NewCourseSelected(wxCommandEvent& event){
 void GBFrameController::PopulateCourseDropDownList(){
   m_courses.clear();
 
-  m_pSql->SelectCourses(&m_courses);
+  if (m_pSql->SelectCourses(&m_courses) == -1) {
+    return;
+  }
 
   for (int i = 0; i < m_courses.size(); ++i) {
     m_pMainFrameView->m_pCourseComboBox->Append(m_courses[i]->Title());    
