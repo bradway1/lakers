@@ -4,7 +4,6 @@ SRCS := src\data\grade.cc \
 				src\data\assessment.cc \
 				src\data\student.cc \
 				src\data\course.cc \
-				src\gui\gbframe.cc \
 				src\sql\gbsql.cc \
 				src\gbapp.cc \
 				src\gui\views\gbframeView.cc \
@@ -65,7 +64,7 @@ LDLIBS :=	-lwxcode_msw30ud_wxsqlite3 -lsqlite3 -lwxmsw30ud_adv -lwxmsw30ud_core 
 
 build: setup gbapp
 
-run:
+run: build
 	$(BUILD_DIR)/gbapp
 
 .PHONY: clean

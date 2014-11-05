@@ -2,8 +2,13 @@
 #include "sql\gbsql.h"
 #include "gui\views\gbframeView.h"
 
-GBFrameController::GBFrameController(GBFrameView *view): m_pMainFrameView(view){
+#include <iostream>
 
+using namespace std;
+
+GBFrameController::GBFrameController(GBFrameView *view)
+  : m_pMainFrameView(view),
+    m_pSql(GBSql::Instance()) {
 	PopulateCourseDropDownList();
 	CreateGridView();
 }
@@ -11,149 +16,113 @@ GBFrameController::GBFrameController(GBFrameView *view): m_pMainFrameView(view){
 
 // *** Modify grid to populate it with data pulled from DB ***
 void GBFrameController::CreateGridView(){
-
-	// Pull Data from DB
-  	GBSql sql;
-    vector<Student*> StudentVec;
-    vector<Assessment*> AssessmentVec;
-	Student *pStudent;
-	Assessment *pAssessment;
-
-	sql.SelectStudentsFromCourse(&StudentVec, GetCourseComboBoxSelection());
-	sql.SelectAssesmentFromCourse(&AssessmentVec, GetCourseComboBoxSelection());
-
 	// Create Student Grid view.
 	// Number of students in course = rows
 	// Total assessments = columns
-	(m_pMainFrameView->m_pGridView)->CreateGrid( StudentVec.size(), AssessmentVec.size());
-	(m_pMainFrameView->m_pGridView)->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0)));
+  (m_pMainFrameView->m_pGridView)->CreateGrid(0, 0);
+  (m_pMainFrameView->m_pGridView)->SetBackgroundColour(wxColour(char(255),char(255), char(255), char(0)));
 	(m_pMainFrameView->m_pGridView)->EnableDragColMove(true);
 	(m_pMainFrameView->m_pGridView)->EnableEditing(true);
 
 
-	for(int i = 0; i < StudentVec.size(); ++i){
-		pStudent = StudentVec[i];
-		(m_pMainFrameView->m_pGridView)->SetRowLabelValue(i,*pStudent->GetFirst());
-	}
-
-	for(int i = 0; i < AssessmentVec.size(); i++){
-		pAssessment = AssessmentVec[i];
-		(m_pMainFrameView->m_pGridView)->SetColLabelValue(i, *pAssessment->GetTitle());
-	}
-
-	(m_pMainFrameView->m_pGridView)->Refresh();
+  (m_pMainFrameView->m_pGridView)->Refresh();
 }
 
-wxString GBFrameController::GetCourseComboBoxSelection(){
+void GBFrameController::UpdateGridView() {
+  Course *course(NULL); 
+  wxGrid *grid = m_pMainFrameView->m_pGridView;
+  wxComboBox *combo = m_pMainFrameView->m_pCourseComboBox; 
+  int selection = combo->GetSelection();	
+  wxString strSelection = combo->GetString(selection);
+	
+  for (int i = 0; i < m_courses.size(); ++i) {
+    if (m_courses[i]->Title().IsSameAs(strSelection)) {
+      course = m_courses[i];
 
-	GBSql sql;
-	vector<Course*> CourseVec;
+      break;
+    }
+  } 
+ 
+  if (course == NULL) {
+    cerr << "Failed to find selected course" << endl; 
+    
+    return;
+  }
 
-	sql.SelectCourse(&CourseVec);
-	Course *pCourse;
+  if (m_pSql->SelectStudentsByCourse(*course) == -1) {
+    cerr << "Failed to select students in course" << endl; 
+    
+    return;
+  }
 
-	for(int i = 0; i < CourseVec.size(); i++){
-		pCourse = CourseVec[i];
+  if (course->StudentCount() > grid->GetNumberRows()) {
+    grid->AppendRows(course->StudentCount() - grid->GetNumberRows());
+  } else {
+    grid->DeleteRows(grid->GetNumberRows() - course->StudentCount());
+  }
 
-		if((m_pMainFrameView->m_pCourseComboBox)->GetStringSelection().IsSameAs(*pCourse->GetTitle(), true))
-			return *pCourse->GetId();
-	}
+  for (int i = 0; i < course->StudentCount(); ++i) {
+    grid->SetRowLabelValue(i, wxString::Format("%s, %s", course->GetStudent(i).Last(), course->GetStudent(i).First()));
+  }
+ 
+  if (m_pSql->SelectAssessmentsByCourse(*course) == -1) {
+    cerr << "Failed to select assessments in course" << endl;
+  
+    return;
+  }
 
-	return "-1";
+  if (course->AssessmentCount() > grid->GetNumberCols()) {
+    grid->AppendCols(course->AssessmentCount() - grid->GetNumberCols());
+  } else {
+    grid->DeleteCols(grid->GetNumberCols() - course->AssessmentCount());
+  }
+
+  for (int i = 0; i < course->AssessmentCount(); ++i) {
+    grid->SetColLabelValue(i, course->GetAssessment(i).Title());
+  }
+
+  grid->Refresh();
 }
-
 
 void  GBFrameController::NewCourseSelected(wxCommandEvent& event){
-
-	GBSql sql;
-    vector<Student*> StudentVec;
-    vector<Assessment*> AssessmentVec;
-
-	sql.SelectAssesmentFromCourse(&AssessmentVec, GetCourseComboBoxSelection());
-	sql.SelectStudentsFromCourse(&StudentVec, GetCourseComboBoxSelection());
-
-	Student *pStudent;
-	Assessment *pAssessment;
-
-	// Modify Students (rows)
-	if(StudentVec.size() > (m_pMainFrameView->m_pGridView)->GetNumberRows()){
-
-		(m_pMainFrameView->m_pGridView)->AppendRows(StudentVec.size() - (m_pMainFrameView->m_pGridView)->GetNumberRows(), true);
-	}
-	else{
-
-		(m_pMainFrameView->m_pGridView)->DeleteRows(0, (m_pMainFrameView->m_pGridView)->GetNumberRows() - StudentVec.size(), true);
-	}
-
-	for(int i = 0; i < StudentVec.size(); ++i){
-
-		pStudent = StudentVec[i];
-		(m_pMainFrameView->m_pGridView)->SetRowLabelValue(i,*pStudent->GetFirst());
-	}
-
-	// Modify Assesments (cols)
-	if(AssessmentVec.size() > (m_pMainFrameView->m_pGridView)->GetNumberCols()){
-
-		(m_pMainFrameView->m_pGridView)->AppendCols(AssessmentVec.size()- (m_pMainFrameView->m_pGridView)->GetNumberCols(), true);
-	}
-	else{
-
-		(m_pMainFrameView->m_pGridView)->DeleteCols(0, (m_pMainFrameView->m_pGridView)->GetNumberCols() - AssessmentVec.size(), true);
-	}
-
-	for(int i = 0; i < AssessmentVec.size(); i++){
-		pAssessment = AssessmentVec[i];
-		(m_pMainFrameView->m_pGridView)->SetColLabelValue(i, *pAssessment->GetTitle());
-	}
-
-	(m_pMainFrameView->m_pGridView)->Refresh();
+  UpdateGridView();
 }
 
 // *** Need to pull data from DB to populate Dropdown list ***
 void GBFrameController::PopulateCourseDropDownList(){
+  m_courses.clear();
 
-    GBSql sql;
-    vector<Course*> courseVec;
+  m_pSql->SelectCourses(&m_courses);
 
-    if (sql.SelectCourse(&courseVec) < 0) {
-      return;
-    }
+  for (int i = 0; i < m_courses.size(); ++i) {
+    m_pMainFrameView->m_pCourseComboBox->Append(m_courses[i]->Title());    
+  }
 
-    for (int i = 0; i < courseVec.size(); ++i) {
-      Course *pCourse = courseVec[i];
-
-      (m_pMainFrameView->m_pCourseComboBox)->Append(*pCourse->GetTitle());
-    }
-
-    if ((m_pMainFrameView->m_pCourseComboBox)->GetCount() > 0) {
-      (m_pMainFrameView->m_pCourseComboBox)->SetSelection(0);
-    }
+  if (m_pMainFrameView->m_pCourseComboBox->GetCount() > 0) {
+    m_pMainFrameView->m_pCourseComboBox->SetValue(m_courses[0]->Title());
+  }
 }
 
 
 void GBFrameController::ModifyAssignments(wxCommandEvent& event){
-
 	// Handle Event
-	m_pDialogAssessmentView = new GBDialogAssessmentView(m_pMainFrameView, (m_pMainFrameView->m_pCourseComboBox)->GetStringSelection());
+	m_pDialogAssessmentView = new GBDialogAssessmentView(m_pMainFrameView);
 	m_pDialogAssessmentView->ShowModal();
 }
 
 
 void GBFrameController::AddCourse(wxCommandEvent& event){
-
 	// Handle Event
 	m_pDialogCourse = new GBDialogCourseView(m_pMainFrameView);
 	m_pDialogCourse->ShowModal();
 }
 
-void GBFrameController::OnExit(wxCommandEvent& event)
-{
+void GBFrameController::OnExit(wxCommandEvent& event) {
 	// Handle Event
     (m_pMainFrameView->Close)( true );
 }
 
-void GBFrameController::OnAbout(wxCommandEvent& event)
-{
+void GBFrameController::OnAbout(wxCommandEvent& event) {
 	// Handle Event
     wxMessageBox( "Grade Book Application version 1.0.0",
                   "About", wxOK | wxICON_INFORMATION );

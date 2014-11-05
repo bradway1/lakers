@@ -12,7 +12,7 @@ class GBDialogAssessmentView
 	friend class GBDialogAssessmentController;
 	public:
 	GBDialogAssessmentView();
-	GBDialogAssessmentView(wxWindow *parent, wxString CourseTitle);
+	GBDialogAssessmentView(wxWindow *parent);
 	~GBDialogAssessmentView()
 		{delete m_pCon, m_pDialog, m_pGBDialogPanel, m_pCourseComboBox, m_pModifyAssignmentListBox;}
 

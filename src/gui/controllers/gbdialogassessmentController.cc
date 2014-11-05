@@ -4,67 +4,68 @@
 
 // Constructor 1
 GBDialogAssessmentController::GBDialogAssessmentController(){}
+
 // Constructor 2
-GBDialogAssessmentController::GBDialogAssessmentController(GBDialogAssessmentView *view, wxString CourseTitle): m_pDialogView(view)
-{
+GBDialogAssessmentController::GBDialogAssessmentController(GBDialogAssessmentView *view)
+  : m_pDialogView(view),
+    m_pSql(GBSql::Instance()) {
 	PopulateCourseChoices();
-	PopulateAssignmentListBox(CourseTitle);
+  PopulateAssessmentListBox(m_pDialogView->m_pCourseComboBox->GetStringSelection());
 }
 
 // NewCourseSelected()
 void GBDialogAssessmentController::NewCourseSelected(wxCommandEvent& event){
-
-	PopulateAssignmentListBox((m_pDialogView->m_pCourseComboBox)->GetStringSelection());
+	PopulateAssessmentListBox((m_pDialogView->m_pCourseComboBox)->GetStringSelection());
 }
 
-// PopulateAssignmentListBox()
-void GBDialogAssessmentController::PopulateAssignmentListBox(wxString CourseTitle){
+// PopulateAssessmentListBox()
+void GBDialogAssessmentController::PopulateAssessmentListBox(wxString CourseTitle){
+  Course *course(NULL);
 
-	wxArrayString assignments;
-	GBSql sql;
-	vector<Assessment*> AssessmentVec;
-	sql.SelectAssesmentFromCourse(&AssessmentVec, GetCourseComboBoxSelection(CourseTitle));
-	Assessment *pAssessment;
+  for (int i = 0; i < m_courses.size(); ++i) {
+    if (m_courses[i]->Title().IsSameAs(CourseTitle)) {
+      course = m_courses[i];
 
-	assignments.Alloc(AssessmentVec.size());
+      break;
+    }
+  }
 
-	for(int i = 0; i < AssessmentVec.size(); i++){
-		pAssessment = AssessmentVec[i];
-		assignments.Add(*pAssessment->GetTitle(),1);
-	}
-	(m_pDialogView->m_pModifyAssignmentListBox)->SetStrings(assignments);
+  if (course == NULL) {
+    return;
+  }
+
+  if (m_pSql->SelectAssessmentsByCourse(*course) == -1) {
+    return;
+  }
+
+  wxArrayString values;
+
+  for (int i = 0; i < course->AssessmentCount(); ++i) {
+    values.Add(course->GetAssessment(i).Title());
+  } 
+
+  m_pDialogView->m_pModifyAssignmentListBox->SetStrings(values); 
 }
 
 // GetCourseComboBoxSelection()
 wxString GBDialogAssessmentController::GetCourseComboBoxSelection(wxString CourseTitle){
-
-	GBSql sql;
-	vector<Course*> CourseVec;
-	sql.SelectCourse(&CourseVec);
-	Course *pCourse;
-
-	for(int i = 0; i < CourseVec.size(); i++){
-		pCourse = CourseVec[i];
-		if( CourseTitle.IsSameAs(*pCourse->GetTitle(), true) )
-			return *pCourse->GetId();
-	}
-
 	return "-1";
-
 }
 
 
 // PopulateCourseChoices()
 void GBDialogAssessmentController::PopulateCourseChoices(){
+  wxComboBox *combo = m_pDialogView->m_pCourseComboBox; 
+  
+  if (m_pSql->SelectCourses(&m_courses) == -1) {
+    return;
+  }
 
-	GBSql sql;
-	vector<Course*> courseVec;
-	sql.SelectCourse(&courseVec);
-	Course *pCourse;
+  for (int i = 0; i < m_courses.size(); ++i) {
+    combo->Append(m_courses[i]->Title()); 
+  }
 
-	for (int i = 0; i < courseVec.size(); ++i) {
-	  pCourse = courseVec[i];
-	  (m_pDialogView->m_pCourseComboBox)->Append(*pCourse->GetTitle());
-	}
-
+  if (combo->GetCount() > 0) {
+    combo->SetValue(m_courses[0]->Title());
+  }
 }
