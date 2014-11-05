@@ -21,6 +21,10 @@ void GBDialogAssessmentController::NewCourseSelected(wxCommandEvent& event){
 // PopulateAssessmentListBox()
 void GBDialogAssessmentController::PopulateAssessmentListBox(wxString CourseTitle){
   Course *course(NULL);
+  
+  if (CourseTitle.IsEmpty() && m_courses.size() > 0) {
+    CourseTitle = m_courses[0]->Title();
+  }
 
   for (int i = 0; i < m_courses.size(); ++i) {
     if (m_courses[i]->Title().IsSameAs(CourseTitle)) {
