@@ -13,6 +13,10 @@ GBDialogAssessmentController::GBDialogAssessmentController(GBDialogAssessmentVie
   PopulateAssessmentListBox(m_pDialogView->m_pCourseComboBox->GetStringSelection());
 }
 
+GBDialogAssessmentController::~GBDialogAssessmentController() {
+
+}
+
 // NewCourseSelected()
 void GBDialogAssessmentController::NewCourseSelected(wxCommandEvent& event){
 	PopulateAssessmentListBox((m_pDialogView->m_pCourseComboBox)->GetStringSelection());

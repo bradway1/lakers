@@ -13,13 +13,15 @@
 #include "sql\gbsql.h"
 #include "gui\views\gbdialogassessmentView.h"
 #include "gui\views\gbdialogcourseView.h"
+#include "data\subscriber.h"
 
 class GBFrameView;
 
-class GBFrameController
-{
+class GBFrameController : public Subscriber {
   public:
     GBFrameController(GBFrameView *view);
+    ~GBFrameController();
+
     // Events
     void AddCourse(wxCommandEvent& event);
     void ModifyAssignments(wxCommandEvent& event);
@@ -28,7 +30,7 @@ class GBFrameController
     void OnAbout(wxCommandEvent& event);
     void NewCourseSelected(wxCommandEvent& event);
   
-    
+    virtual void OnCourseUpdate(); 
 
   private:
     void PopulateCourseDropDownList();
