@@ -26,6 +26,8 @@ class Student {
     Grade &GetGrade(int index) const;
     int GradeCount();
 
+    void Clear() { m_grades.clear(); }
+
   private:
     wxString *m_pId; 
     wxString *m_pFirst;

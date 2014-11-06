@@ -251,6 +251,8 @@ int GBSql::SelectGradesForStudentInCourse(Student &s, const Course &c) {
   Grade *g;
   wxSQLite3ResultSet *r = Query(sql);
 
+  s.Clear();
+
   while (r->NextRow()) {
     g = new Grade(r->GetAsString("id"));
 
