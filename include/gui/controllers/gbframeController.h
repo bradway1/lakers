@@ -39,8 +39,6 @@ class GBFrameController : public Subscriber {
 
     GBSql *m_pSql;
     GBFrameView 				*m_pMainFrameView;
-    GBDialogAssessmentView		*m_pDialogAssessmentView;
-    GBDialogCourseView			*m_pDialogCourse;
     vector<Course*> m_courses;
 };
 

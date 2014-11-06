@@ -19,8 +19,6 @@ GBFrameController::GBFrameController(GBFrameView *view)
 
 GBFrameController::~GBFrameController() {
   delete m_pMainFrameView;
-  delete m_pDialogAssessmentView;
-  delete m_pDialogCourse;
 
   m_pSql->RemoveSubscriber(this);
 
@@ -133,15 +131,17 @@ void GBFrameController::PopulateCourseDropDownList(){
 
 void GBFrameController::ModifyAssignments(wxCommandEvent& event){
 	// Handle Event
-	m_pDialogAssessmentView = new GBDialogAssessmentView(m_pMainFrameView);
-	m_pDialogAssessmentView->ShowModal();
+	GBDialogAssessmentView dlg(m_pMainFrameView);
+  
+	dlg.ShowModal();
 }
 
 
 void GBFrameController::AddCourse(wxCommandEvent& event){
 	// Handle Event
-	m_pDialogCourse = new GBDialogCourseView(m_pMainFrameView);
-	m_pDialogCourse->ShowModal();
+  GBDialogCourseView dlg(m_pMainFrameView);
+  
+	dlg.ShowModal();
 }
 
 void GBFrameController::OnExit(wxCommandEvent& event) {

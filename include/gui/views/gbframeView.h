@@ -7,21 +7,19 @@
 #define GBDIALOGSIZE wxSize(350,450)
 
 
-class GBFrameView: public wxFrame
-{
-public:
+class GBFrameView: public wxFrame {
+  public:
     GBFrameView(const wxString& title, const wxPoint& pos, const wxSize& size);
-	wxBoxSizer 					*m_pCourseDropDownListSizer;
-	wxBoxSizer 					*m_pGBFrameSizer;
+    wxBoxSizer 					*m_pCourseDropDownListSizer;
+    wxBoxSizer 					*m_pGBFrameSizer;
   	wxComboBox 					*m_pCourseComboBox;
     wxPanel						*m_pGBFramePanel;
-	wxGrid						*m_pGridView;
-	wxDialog					*m_pGBDialog;
-	wxPanel						*m_pGBDialogPanel;
+    wxGrid						*m_pGridView;
+    wxDialog					*m_pGBDialog;
+    wxPanel						*m_pGBDialogPanel;
 
 	protected:
-	GBFrameController			*m_pCon;
-
+    GBFrameController			*m_pCon;
 };
 
 

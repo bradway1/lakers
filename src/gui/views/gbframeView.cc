@@ -1,7 +1,6 @@
 #include "gui\views\gbframeView.h"
 #include "sql\gbsql.h"
 
-
 GBFrameView::GBFrameView(const wxString& title, const wxPoint& pos, const wxSize& size): wxFrame(NULL, wxID_ANY, title, pos, size)
 {
 
