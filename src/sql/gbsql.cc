@@ -11,6 +11,7 @@ GBSql::GBSql() {
 
 }
 
+// Singleton mutator
 GBSql *GBSql::Instance() {
   if (!m_pInstance) {
     m_pInstance = new GBSql;
@@ -19,6 +20,8 @@ GBSql *GBSql::Instance() {
   return m_pInstance;
 }
 
+// Executes sql update and handles possible exceptions
+// Returns -1 on failure
 int GBSql::Update(const wxString &sql) {
   try {
     return m_db.ExecuteUpdate(sql);
@@ -29,6 +32,8 @@ int GBSql::Update(const wxString &sql) {
   }
 }
 
+// Executes sql query and handles possible exceptions
+// Returns valid result set on success
 wxSQLite3ResultSet *GBSql::Query(const wxString &sql) {
   try {
     return new wxSQLite3ResultSet(m_db.ExecuteQuery(sql));
@@ -39,6 +44,8 @@ wxSQLite3ResultSet *GBSql::Query(const wxString &sql) {
   }
 }
 
+// Opens and initializes database with tables
+// Returns 0 on success
 int GBSql::Initialize(const wxString &file) {
   static char tables[5][1024] = {
     "CREATE TABLE IF NOT EXISTS students (\
@@ -82,6 +89,8 @@ int GBSql::Initialize(const wxString &file) {
   return 0;
 }
 
+// Opens database
+// Returns 0 on success
 int GBSql::Open(const wxString &file) {
   try {
     m_db.Open(file);
@@ -94,6 +103,8 @@ int GBSql::Open(const wxString &file) {
   }
 }
 
+// Closes database
+// Returns 0 on success
 int GBSql::Close() {
   try {
     m_db.Close();
@@ -106,6 +117,8 @@ int GBSql::Close() {
   }
 }
 
+// Imports sqlite backup and handles exception
+// Returns 0 on success
 int GBSql::Import(const wxString &file, const wxString &backup) {
   if (Open(file)) {
     return 1;
@@ -145,6 +158,7 @@ int GBSql::InsertCourse(const Course &c) {
 
   int r = Update(sql);
 
+  // Notifies subscribers
   NotifyCourseUpdate();
 
   return r;
@@ -167,6 +181,7 @@ int GBSql::SelectStudentsByCourse(Course &c) {
   Student *s;
   wxSQLite3ResultSet *r = Query(sql);
 
+  // Ensure clean slate
   c.Clear();
 
   while (r->NextRow()) {
@@ -194,6 +209,7 @@ int GBSql::InsertStudentIntoCourse(const Student &s, const Course &c) {
 
   int r = Update(sql);
 
+  // Notify subscribers
   NotifyStudentUpdate();
 
   return r;
@@ -213,6 +229,7 @@ int GBSql::SelectAssessmentsByCourse(Course &c) {
   Assessment *a;
   wxSQLite3ResultSet *r = Query(sql);
 
+  // Ensure clean slate
 	c.Clear();
 
   while (r->NextRow()) {
@@ -232,6 +249,7 @@ int GBSql::InsertAssessmentIntoCourse(const Assessment &a, const Course &c) {
 
   int r = Update(sql);
 
+  // Notify subscribers
   NotifyAssessmentUpdate();
 
   return r;
@@ -270,7 +288,12 @@ int GBSql::InsertGradeForStudent(const Grade &g, const Student &s, const Course 
       VALUES (NULL, '%s', '%s', '%s', '%s')", \
       s.Id(), c.Id(), a.Id(), g.Value());
 
-  return Update(sql);
+  int r = Update(sql);
+
+  // Notifies subscribers
+  NotifyGradeUpdate();
+
+  return r;
 
 }
 
