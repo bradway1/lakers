@@ -10,11 +10,24 @@ GBFrameController::GBFrameController(GBFrameView *view)
   : m_pMainFrameView(view),
     m_pSql(GBSql::Instance()) {
 
+  m_pSql->AddSubscriber(this);
+
 	PopulateCourseDropDownList();
   
 	CreateGridView();
 }
 
+GBFrameController::~GBFrameController() {
+  delete m_pMainFrameView;
+  delete m_pDialogAssessmentView;
+  delete m_pDialogCourse;
+
+  m_pSql->RemoveSubscriber(this);
+
+  for (int i = 0; i < m_courses.size(); ++i) {
+    delete m_courses[i];
+  }
+}
 
 // *** Modify grid to populate it with data pulled from DB ***
 void GBFrameController::CreateGridView(){
@@ -27,7 +40,6 @@ void GBFrameController::CreateGridView(){
 	(m_pMainFrameView->m_pGridView)->EnableEditing(true);
 
   UpdateGridView();
-
 }
 
 void GBFrameController::UpdateGridView() {
@@ -62,8 +74,8 @@ void GBFrameController::UpdateGridView() {
 
   if (course->StudentCount() > grid->GetNumberRows()) {
     grid->AppendRows(course->StudentCount() - grid->GetNumberRows());
-  } else {
-    grid->DeleteRows(grid->GetNumberRows() - course->StudentCount());
+  } else if (course->StudentCount() < grid->GetNumberRows()) {
+    grid->DeleteRows(0, grid->GetNumberRows() - course->StudentCount());
   }
 
   for (int i = 0; i < course->StudentCount(); ++i) {
@@ -77,11 +89,9 @@ void GBFrameController::UpdateGridView() {
   }
 
   if (course->AssessmentCount() > grid->GetNumberCols()) {
-
     grid->AppendCols(course->AssessmentCount() - grid->GetNumberCols());
-  } else {
-
-    grid->DeleteCols(0,grid->GetNumberCols() - course->AssessmentCount());
+  } else if (course->AssessmentCount() < grid->GetNumberCols()) {
+    grid->DeleteCols(0, grid->GetNumberCols() - course->AssessmentCount());
   }
 
   for (int i = 0; i < course->AssessmentCount(); ++i) {
@@ -95,20 +105,28 @@ void  GBFrameController::NewCourseSelected(wxCommandEvent& event){
   UpdateGridView();
 }
 
+void GBFrameController::OnCourseUpdate() {
+  PopulateCourseDropDownList();
+}
+
 // *** Need to pull data from DB to populate Dropdown list ***
 void GBFrameController::PopulateCourseDropDownList(){
+  wxComboBox *course = m_pMainFrameView->m_pCourseComboBox;
+
   m_courses.clear();
 
   if (m_pSql->SelectCourses(&m_courses) == -1) {
     return;
   }
 
+  course->Clear();  
+
   for (int i = 0; i < m_courses.size(); ++i) {
-    m_pMainFrameView->m_pCourseComboBox->Append(m_courses[i]->Title());
+    course->Append(m_courses[i]->Title());
   }
 
-  if (m_pMainFrameView->m_pCourseComboBox->GetCount() > 0) {
-    m_pMainFrameView->m_pCourseComboBox->SetValue(m_courses[0]->Title());
+  if (course->GetCount() > 0) {
+    course->SetValue(m_courses[0]->Title());
   }
 }
 

@@ -1,19 +1,18 @@
 #include "gui\views\gbdialogcourseView.h"
 #include "sql\gbsql.h"
 
-GBDialogCourseView::GBDialogCourseView(wxWindow *parent){
+GBDialogCourseView::GBDialogCourseView(wxWindow *parent)
+  : wxDialog(parent, wxID_ANY, wxT("Add Course"), wxDefaultPosition, GB_COURSE_DIALOGSIZE) {
 
-	wxStaticBox				*CourseNameStaticBox;
+  wxStaticBox       *CourseNameStaticBox;
 	wxStaticBox				*CourseNumberStaticBox;
 	wxStaticBox				*ImportStudentCSVStaticBox;
 	wxStaticBox				*SelectStudentsToImportStaticBox;
 
 	// Create Dialog
-	m_pDialog = new  wxDialog(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, GB_COURSE_DIALOGSIZE, wxDEFAULT_DIALOG_STYLE, "GBDialog");
-	m_pDialog->SetTitle("Add Course(s)");
-	m_pDialog->SetClientSize(GB_COURSE_DIALOGSIZE);
+	SetClientSize(GB_COURSE_DIALOGSIZE);
 	// Create Panel
-	m_pGBDialogPanel = new wxPanel(m_pDialog, wxID_ANY, wxPoint(0,0), GB_COURSE_DIALOGSIZE, wxTAB_TRAVERSAL, "ID_GBDialogPanel");
+	m_pGBDialogPanel = new wxPanel(this, wxID_ANY, wxPoint(0,0), GB_COURSE_DIALOGSIZE, wxTAB_TRAVERSAL, "ID_GBDialogPanel");
 	// Create Static Boxes
 	CourseNameStaticBox = new wxStaticBox(m_pGBDialogPanel, wxID_ANY, "Course Name", wxPoint(10,10), wxSize(325,50), 0,"Course Name");
 	CourseNumberStaticBox =  new wxStaticBox(m_pGBDialogPanel, wxID_ANY, "Course Number", wxPoint(10,75), wxSize(325,50), 0,"Course Number");
@@ -30,10 +29,9 @@ GBDialogCourseView::GBDialogCourseView(wxWindow *parent){
 	// Connect Events Handler(s) to Controller
 	m_pSelectFileLocationCtrl->Bind(wxEVT_FILEPICKER_CHANGED, &GBDialogCourseController::FileHasBeenSelected, m_pController);
 	m_pImportButton->Bind(wxEVT_BUTTON, &GBDialogCourseController::AddButtonWasClicked, m_pController);
-
 }
 
 GBDialogCourseView::~GBDialogCourseView(){
-	delete m_pController, m_pDialog, m_pGBDialogPanel, m_pCourseNameTextCtrl,
+	delete m_pController, m_pGBDialogPanel, m_pCourseNameTextCtrl,
 			m_pCourseNumberTextCtrl, m_pSelectFileLocationCtrl, m_pImportButton;
 }

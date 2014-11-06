@@ -8,6 +8,7 @@
 #include <wx/panel.h>
 #include <wx/listctrl.h>
 #include <wx/checklst.h>
+#include "sql/gbsql.h"
 
 #define GB_COURSE_DIALOGSIZE wxSize(350,500)
 
@@ -16,14 +17,15 @@ class GBDialogCourseView;
 class  GBDialogCourseController
 {
 	public:
-	GBDialogCourseController(GBDialogCourseView *view);
-	void AddButtonWasClicked(wxCommandEvent& event);
-	void FileHasBeenSelected(wxFileDirPickerEvent& event);
+    GBDialogCourseController(GBDialogCourseView *view);
+    void AddButtonWasClicked(wxCommandEvent& event);
+    void FileHasBeenSelected(wxFileDirPickerEvent& event);
 
 	private:
-	GBDialogCourseView *m_pDialogView;
-	void ImportStudents();
+    void ImportStudents();
 
+    GBSql *m_pSql;
+    GBDialogCourseView *m_pDialogView;
 };
 
 #endif
