@@ -44,11 +44,7 @@ void GBFrameController::UpdateGridView() {
   Course *course(NULL);
   wxGrid *grid = m_pMainFrameView->m_pGridView;
   wxComboBox *combo = m_pMainFrameView->m_pCourseComboBox;
-  wxString strSelection = combo->GetStringSelection();
-
-  if (strSelection.IsEmpty() && m_courses.size() > 0) {
-    strSelection = m_courses[0]->Title();
-  }
+  wxString strSelection = combo->GetValue();
 
   for (int i = 0; i < m_courses.size(); ++i) {
     if (m_courses[i]->Title().IsSameAs(strSelection)) {

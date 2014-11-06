@@ -10,7 +10,7 @@ GBDialogAssessmentController::GBDialogAssessmentController(GBDialogAssessmentVie
   : m_pDialogView(view),
     m_pSql(GBSql::Instance()) {
 	PopulateCourseChoices();
-  PopulateAssessmentListBox(m_pDialogView->m_pCourseComboBox->GetStringSelection());
+  PopulateAssessmentListBox(m_pDialogView->m_pCourseComboBox->GetValue());
 }
 
 GBDialogAssessmentController::~GBDialogAssessmentController() {
@@ -19,16 +19,12 @@ GBDialogAssessmentController::~GBDialogAssessmentController() {
 
 // NewCourseSelected()
 void GBDialogAssessmentController::NewCourseSelected(wxCommandEvent& event){
-	PopulateAssessmentListBox((m_pDialogView->m_pCourseComboBox)->GetStringSelection());
+	PopulateAssessmentListBox((m_pDialogView->m_pCourseComboBox)->GetValue());
 }
 
 // PopulateAssessmentListBox()
 void GBDialogAssessmentController::PopulateAssessmentListBox(wxString CourseTitle){
   Course *course(NULL);
-  
-  if (CourseTitle.IsEmpty() && m_courses.size() > 0) {
-    CourseTitle = m_courses[0]->Title();
-  }
 
   for (int i = 0; i < m_courses.size(); ++i) {
     if (m_courses[i]->Title().IsSameAs(CourseTitle)) {
