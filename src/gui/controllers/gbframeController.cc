@@ -26,13 +26,12 @@ void GBFrameController::CreateGridView(){
 
   UpdateGridView();
 
-  (m_pMainFrameView->m_pGridView)->Refresh();
 }
 
 void GBFrameController::UpdateGridView() {
-  Course *course(NULL); 
+  Course *course(NULL);
   wxGrid *grid = m_pMainFrameView->m_pGridView;
-  wxComboBox *combo = m_pMainFrameView->m_pCourseComboBox; 
+  wxComboBox *combo = m_pMainFrameView->m_pCourseComboBox;
   wxString strSelection = combo->GetStringSelection();
 
   if (strSelection.IsEmpty() && m_courses.size() > 0) {
@@ -45,17 +44,17 @@ void GBFrameController::UpdateGridView() {
 
       break;
     }
-  } 
- 
+  }
+
   if (course == NULL) {
-    cerr << "Failed to find selected course" << endl; 
-    
+    cerr << "Failed to find selected course" << endl;
+
     return;
   }
 
   if (m_pSql->SelectStudentsByCourse(*course) == -1) {
-    cerr << "Failed to select students in course" << endl; 
-    
+    cerr << "Failed to select students in course" << endl;
+
     return;
   }
 
@@ -68,17 +67,19 @@ void GBFrameController::UpdateGridView() {
   for (int i = 0; i < course->StudentCount(); ++i) {
     grid->SetRowLabelValue(i, wxString::Format("%s, %s", course->GetStudent(i).Last(), course->GetStudent(i).First()));
   }
- 
+
   if (m_pSql->SelectAssessmentsByCourse(*course) == -1) {
     cerr << "Failed to select assessments in course" << endl;
-  
+
     return;
   }
 
   if (course->AssessmentCount() > grid->GetNumberCols()) {
+
     grid->AppendCols(course->AssessmentCount() - grid->GetNumberCols());
   } else {
-    grid->DeleteCols(grid->GetNumberCols() - course->AssessmentCount());
+
+    grid->DeleteCols(0,grid->GetNumberCols() - course->AssessmentCount());
   }
 
   for (int i = 0; i < course->AssessmentCount(); ++i) {
@@ -101,7 +102,7 @@ void GBFrameController::PopulateCourseDropDownList(){
   }
 
   for (int i = 0; i < m_courses.size(); ++i) {
-    m_pMainFrameView->m_pCourseComboBox->Append(m_courses[i]->Title());    
+    m_pMainFrameView->m_pCourseComboBox->Append(m_courses[i]->Title());
   }
 
   if (m_pMainFrameView->m_pCourseComboBox->GetCount() > 0) {

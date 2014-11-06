@@ -24,7 +24,7 @@ int GBSql::Update(const wxString &sql) {
     return m_db.ExecuteUpdate(sql);
   } catch (wxSQLite3Exception &e) {
     cerr << e.GetMessage() << endl;
-    
+
     return -1;
   }
 }
@@ -63,7 +63,7 @@ int GBSql::Initialize(const wxString &file) {
       id integer primary key, \
       sid text not null, \
       cid text not null)",
-  };  
+  };
 
   if (Open(file)) {
     cerr << "Error opening database: " << file << endl;
@@ -85,11 +85,11 @@ int GBSql::Initialize(const wxString &file) {
 int GBSql::Open(const wxString &file) {
   try {
     m_db.Open(file);
-  
-    return 0; 
+
+    return 0;
   } catch (wxSQLite3Exception &e) {
-    cerr << e.GetMessage() << endl; 
-    
+    cerr << e.GetMessage() << endl;
+
     return 1;
   }
 }
@@ -109,12 +109,12 @@ int GBSql::Close() {
 int GBSql::Import(const wxString &file, const wxString &backup) {
   if (Open(file)) {
     return 1;
-  } 
-  
-  try { 
+  }
+
+  try {
     m_db.Restore(backup);
-  
-    return 0; 
+
+    return 0;
   } catch (wxSQLite3Exception &e) {
     cerr << e.GetMessage() << endl;
 
@@ -135,7 +135,7 @@ int GBSql::SelectCourses(vector<Course*> *result) {
 
     result->push_back(c);
   }
-  
+
   return result->size();
 }
 
@@ -163,15 +163,17 @@ int GBSql::SelectStudentsByCourse(Course &c) {
   Student *s;
   wxSQLite3ResultSet *r = Query(sql);
 
+  c.Clear();
+
   while (r->NextRow()) {
     s = new Student(r->GetAsString("sid"));
-    
+
     s->SetFirst(r->GetAsString("first"));
     s->SetLast(r->GetAsString("last"));
 
     c.AddStudent(s);
   }
-  
+
   return c.StudentCount();
 }
 
@@ -202,6 +204,8 @@ int GBSql::SelectAssessmentsByCourse(Course &c) {
 
   Assessment *a;
   wxSQLite3ResultSet *r = Query(sql);
+
+	c.Clear();
 
   while (r->NextRow()) {
     a = new Assessment(r->GetAsString("id"));
@@ -251,13 +255,13 @@ int GBSql::InsertGradeForStudent(const Grade &g, const Student &s, const Course 
   wxString sql = wxString::Format("INSERT INTO grades \
       VALUES (NULL, '%s', '%s', '%s', '%s')", \
       s.Id(), c.Id(), a.Id(), g.Value());
-  
+
   return Update(sql);
 }
 
 int GBSql::DeleteGrade(const Grade &g) {
   wxString sql = wxString::Format("DELETE FROM grades \
-     WHERE id='%s'", g.Id()); 
-  
+     WHERE id='%s'", g.Id());
+
   return Update(sql);
 }

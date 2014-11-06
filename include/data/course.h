@@ -12,7 +12,7 @@ using std::vector;
 
 class Course {
   public:
-    Course(); 
+    Course();
     Course(const wxString &id);
     ~Course();
 
@@ -28,10 +28,11 @@ class Course {
     void AddAssessment(Assessment *assessment);
     Assessment &GetAssessment(int index) const;
     int AssessmentCount();
+    void Clear(){m_assessments.clear(); m_students.clear();}
 
   private:
     wxString *m_pId;
-    wxString *m_pTitle;  
+    wxString *m_pTitle;
     vector<Student*> m_students;
     vector<Assessment*> m_assessments;
 };
