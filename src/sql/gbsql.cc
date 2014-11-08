@@ -187,6 +187,7 @@ int GBSql::SelectStudentsByCourse(Course &c) {
   while (r->NextRow()) {
     s = new Student(r->GetAsString("sid"));
 
+    s->SetStudentId(r->GetAsString("sid"));
     s->SetFirst(r->GetAsString("first"));
     s->SetLast(r->GetAsString("last"));
 

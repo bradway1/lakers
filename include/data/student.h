@@ -16,9 +16,11 @@ class Student {
     ~Student();
 
     wxString &Id() const { return *m_pId; }
+    wxString &StudentId() const { return *m_pStudentId; }
     wxString &First() const { return *m_pFirst; }
     wxString &Last() const { return *m_pLast; }
 
+    void SetStudentId(const wxString &id) { m_pStudentId = new wxString(id); }
     void SetFirst(const wxString &first) { m_pFirst = new wxString(first); }
     void SetLast(const wxString &last) { m_pLast = new wxString(last); }
 
@@ -30,6 +32,7 @@ class Student {
 
   private:
     wxString *m_pId; 
+    wxString *m_pStudentId;
     wxString *m_pFirst;
     wxString *m_pLast;
     vector<Grade*> m_grades;
