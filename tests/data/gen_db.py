@@ -41,23 +41,21 @@ c = conn.cursor()
 for table in tables:
   c.execute(table)
 
-sid = 0
-
 for x in range(len(courses)):
-  c.execute("INSERT INTO courses VALUES (NULL, '" + courses[x] + "')") 
-  cid = c.execute("SELECT id FROM courses WHERE title='" + courses[x] + "'").fetchone()
+  c.execute("INSERT INTO courses VALUES (NULL, '" + str(courses[x]) + "')")
+  cid = c.execute("SELECT id FROM courses WHERE title='" + str(courses[x]) + "'").fetchone()[0]
+  for y in range(assessments[x]):
+    c.execute("INSERT INTO assessments VALUES (NULL,'assessment" + str(y) + "','" + str(cid) + "')")
   for y in range(students[x]):
+    actual_sid = random.randint(900000, 1000000)
     name = random.randint(0, 1)
-    c.execute("INSERT INTO students VALUES (NULL, '" + str(sid) + "', '" + names[name] + "', 'doe')")
-    c.execute("INSERT INTO course_student VALUES (NULL, '" + str(sid) + "', '" + str(cid[0]) + "')")
-    sid += 1
-  s = c.execute("SELECT students.sid, first, last FROM students inner join course_student on students.sid=course_student.sid WHERE course_student.cid='" + str(cid[0]) + "'").fetchall()
-  for z in range(assessments[x]):
-    c.execute("INSERT INTO assessments VALUES (NULL, 'assessment" + str(z) + "', '" + str(cid[0]) + "')")
-    aid = c.execute("SELECT id FROM assessments WHERE title='assessment" + str(z) + "'").fetchone()
-    for u in range(len(s)): 
-      grade = random.randint(0, 100)
-      c.execute("INSERT INTO grades VALUES (NULL, '" + str(s[u][0]) + "', '" + str(cid[0]) + "', '" + str(aid[0]) + "', '" + str(grade) + "')")
+    c.execute("INSERT INTO students VALUES (NULL,'" + str(actual_sid) + "','" + str(names[name]) + "','Doe')")
+    sid = c.execute("SELECT id FROM students WHERE sid='" + str(actual_sid) + "'").fetchone()[0]
+    c.execute("INSERT INTO course_student VALUES (NULL,'" + str(sid) + "','" + str(cid) + "')")
+    for z in range(assessments[x]):
+      value = random.randint(0, 100)
+      aid = c.execute("SELECT id FROM assessments WHERE title='assessment" + str(z) + "' AND cid='" + str(cid) + "'").fetchone()[0]
+      c.execute("INSERT INTO grades VALUES (NULL,'" + str(sid) + "','" + str(cid) + "','" + str(aid) + "','" + str(value) + "')")
 
 conn.commit()
 
