@@ -181,9 +181,6 @@ int GBSql::SelectStudentsByCourse(Course &c) {
   Student *s;
   wxSQLite3ResultSet *r = Query(sql);
 
-  // Ensure clean slate
-  c.Clear();
-
   while (r->NextRow()) {
     s = new Student(r->GetAsString("sid"));
 
@@ -230,9 +227,6 @@ int GBSql::SelectAssessmentsByCourse(Course &c) {
   Assessment *a;
   wxSQLite3ResultSet *r = Query(sql);
 
-  // Ensure clean slate
-	c.Clear();
-
   while (r->NextRow()) {
     a = new Assessment(r->GetAsString("id"));
 
@@ -269,8 +263,6 @@ int GBSql::SelectGradesForStudentInCourse(Student &s, const Course &c) {
 
   Grade *g;
   wxSQLite3ResultSet *r = Query(sql);
-
-  s.Clear();
 
   while (r->NextRow()) {
     g = new Grade(r->GetAsString("id"));

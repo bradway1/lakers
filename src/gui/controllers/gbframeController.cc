@@ -60,6 +60,8 @@ void GBFrameController::UpdateGridView() {
     return;
   }
 
+  course->Clear();
+
   if (m_pSql->SelectStudentsByCourse(*course) == -1) {
     cerr << "Failed to select students in course" << endl;
 
