@@ -9,14 +9,14 @@ class Assessment {
     Assessment(const wxString &id);
     ~Assessment();
 
-    wxString &Id() const { return *m_pId; }
-    wxString &Title() const { return *m_pTitle; }
+    wxString Id() const { return m_id; }
+    wxString Title() const { return m_title; }
 
-    void SetTitle(const wxString &title) { m_pTitle = new wxString(title); }
+    void SetTitle(const wxString &title) { m_title = title; }
 
   private:
-    wxString *m_pId;
-    wxString *m_pTitle;
+    wxString m_id;
+    wxString m_title;
 };
 
 #endif

@@ -1,18 +1,17 @@
 #include "data\assessment.h"
 
 Assessment::Assessment() 
-  : m_pId(NULL),
-    m_pTitle(NULL) {
+  : m_id(),
+    m_title() {
 
 }
 
 Assessment::Assessment(const wxString &id)
-  : m_pId(new wxString(id)),
-    m_pTitle(NULL) {
+  : m_id(id),
+    m_title() {
 
 }
 
 Assessment::~Assessment() {
-  delete m_pId;
-  delete m_pTitle;
+
 }

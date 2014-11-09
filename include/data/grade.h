@@ -9,17 +9,17 @@ class Grade {
     Grade(const wxString &id);
     ~Grade();
 
-    wxString &Id() const { return *m_pId; }
-    wxString &Value() const { return *m_pValue; }
-    wxString &AssessmentId() const { return *m_pAId; }
+    wxString Id() const { return m_id; }
+    wxString Value() const { return m_value; }
+    wxString AssessmentId() const { return m_assessmentId; }
 
-    void SetValue(const wxString &value) { m_pValue = new wxString(value); }
-    void SetAssessmentId(const wxString &aid) { m_pAId = new wxString(aid); }
+    void SetValue(const wxString &value) { m_value = value; }
+    void SetAssessmentId(const wxString &aid) { m_assessmentId = aid; }
 
   private:
-    wxString *m_pId;
-    wxString *m_pAId;
-    wxString *m_pValue;
+    wxString m_id;
+    wxString m_assessmentId;
+    wxString m_value;
 };
 
 #endif

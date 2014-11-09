@@ -16,23 +16,24 @@ class Course {
     Course(const wxString &id);
     ~Course();
 
-    wxString &Id() const { return *m_pId; }
-    wxString &Title() const { return *m_pTitle; }
+    wxString Id() const { return m_id; }
+    wxString Title() const { return m_title; }
 
-    void SetTitle(const wxString &title) { m_pTitle = new wxString(title); }
+    void SetTitle(const wxString &title) { m_title = title; }
 
     void AddStudent(Student *student);
     Student &GetStudent(int index) const;
     int StudentCount();
 
     void AddAssessment(Assessment *assessment);
-    Assessment &GetAssessment(int index) const;
+    Assessment GetAssessment(int index) const;
+    Assessment GetAssessmentByTitle(const wxString &title) const;
     int AssessmentCount();
-    void Clear(){m_assessments.clear(); m_students.clear();}
+    void Clear() { m_assessments.clear(); m_students.clear(); }
 
   private:
-    wxString *m_pId;
-    wxString *m_pTitle;
+    wxString m_id;
+    wxString m_title;
     vector<Student*> m_students;
     vector<Assessment*> m_assessments;
 };
