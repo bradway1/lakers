@@ -172,17 +172,17 @@ int GBSql::DeleteCourse(const Course &c) {
 }
 
 int GBSql::SelectStudentsByCourse(Course &c) {
-  wxString sql = wxString::Format("SELECT students.sid, first, last \
+  wxString sql = wxString::Format("SELECT students.id, students.sid, first, last \
      FROM students \
      INNER JOIN course_student \
-     ON students.sid=course_student.sid \
+     ON students.id=course_student.sid \
      WHERE course_student.cid='%s'", c.Id());
 
   Student *s;
   wxSQLite3ResultSet *r = Query(sql);
 
   while (r->NextRow()) {
-    s = new Student(r->GetAsString("sid"));
+    s = new Student(r->GetAsString("id"));
 
     s->SetStudentId(r->GetAsString("sid"));
     s->SetFirst(r->GetAsString("first"));
