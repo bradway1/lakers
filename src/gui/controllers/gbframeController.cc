@@ -62,22 +62,6 @@ void GBFrameController::UpdateGridView() {
 
   course->Clear();
 
-  if (m_pSql->SelectStudentsByCourse(*course) == -1) {
-    cerr << "Failed to select students in course" << endl;
-
-    return;
-  }
-
-  if (course->StudentCount() > grid->GetNumberRows()) {
-    grid->AppendRows(course->StudentCount() - grid->GetNumberRows());
-  } else if (course->StudentCount() < grid->GetNumberRows()) {
-    grid->DeleteRows(0, grid->GetNumberRows() - course->StudentCount());
-  }
-
-  for (int i = 0; i < course->StudentCount(); ++i) {
-    grid->SetRowLabelValue(i, wxString::Format("%s, %s", course->GetStudent(i).Last(), course->GetStudent(i).First()));
-  }
-
   if (m_pSql->SelectAssessmentsByCourse(*course) == -1) {
     cerr << "Failed to select assessments in course" << endl;
 
@@ -92,6 +76,36 @@ void GBFrameController::UpdateGridView() {
 
   for (int i = 0; i < course->AssessmentCount(); ++i) {
     grid->SetColLabelValue(i, course->GetAssessment(i).Title());
+  }
+  
+  if (m_pSql->SelectStudentsByCourse(*course) == -1) {
+    cerr << "Failed to select students in course" << endl;
+
+    return;
+  }
+
+  if (course->StudentCount() > grid->GetNumberRows()) {
+    grid->AppendRows(course->StudentCount() - grid->GetNumberRows());
+  } else if (course->StudentCount() < grid->GetNumberRows()) {
+    grid->DeleteRows(0, grid->GetNumberRows() - course->StudentCount());
+  }
+
+  for (int i = 0; i < course->StudentCount(); ++i) {
+    Student s = course->GetStudent(i);
+
+    for (int x = 0; x < grid->GetNumberCols(); ++x) {
+      Assessment a = course->GetAssessmentByTitle(grid->GetColLabelValue(x));
+    
+      if (m_pSql->SelectGradesForStudentInCourse(s, *course) == -1) {
+        continue;
+      }
+
+      Grade g = s.GetGradeByAssessmentId(a.Id()); 
+      
+      grid->SetCellValue(i, x, g.Value());
+    }
+
+    grid->SetRowLabelValue(i, wxString::Format("%s, %s", s.Last(), s.First()));
   }
 
   grid->Refresh();
