@@ -14,20 +14,18 @@
 
 class  GBDialogCourseView : public wxDialog {
 	public:
-	GBDialogCourseView(wxWindow *parent);
-	~GBDialogCourseView();
+    GBDialogCourseView(wxWindow *parent);
+    ~GBDialogCourseView();
 
-	wxTextCtrl					*m_pCourseNameTextCtrl;
-	wxTextCtrl					*m_pCourseNumberTextCtrl;
+    wxTextCtrl					*m_pCourseNameTextCtrl;
 
 	private:
-	// Member Variables
-	GBDialogCourseController 	*m_pController;
-	wxPanel						*m_pGBDialogPanel;
-	wxFilePickerCtrl 			*m_pSelectFileLocationCtrl;
-	wxCheckListBox				*m_pcsvFileViewListBox;
-	wxButton					*m_pImportButton;
-
+    // Member Variables
+    GBDialogCourseController 	*m_pController;
+    wxPanel						*m_pGBDialogPanel;
+    wxFilePickerCtrl 			*m_pSelectFileLocationCtrl;
+    wxCheckListBox				*m_pcsvFileViewListBox;
+    wxButton					*m_pImportButton;
 };
 
 enum{

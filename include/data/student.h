@@ -15,23 +15,27 @@ class Student {
     Student(const wxString &id);
     ~Student();
 
-    wxString &Id() const { return *m_pId; }
-    wxString &First() const { return *m_pFirst; }
-    wxString &Last() const { return *m_pLast; }
+    wxString Id() const { return m_id; }
+    wxString StudentId() const { return m_studentId; }
+    wxString First() const { return m_first; }
+    wxString Last() const { return m_last; }
 
-    void SetFirst(const wxString &first) { m_pFirst = new wxString(first); }
-    void SetLast(const wxString &last) { m_pLast = new wxString(last); }
+    void SetStudentId(const wxString &id) { m_studentId = id; }
+    void SetFirst(const wxString &first) { m_first = first; }
+    void SetLast(const wxString &last) { m_last = last; }
 
     void AddGrade(Grade *grade);
-    Grade &GetGrade(int index) const;
+    Grade GetGrade(int index) const;
+    Grade GetGradeByAssessmentId(const wxString &id) const;
     int GradeCount();
 
     void Clear() { m_grades.clear(); }
 
   private:
-    wxString *m_pId; 
-    wxString *m_pFirst;
-    wxString *m_pLast;
+    wxString m_id; 
+    wxString m_studentId;
+    wxString m_first;
+    wxString m_last;
     vector<Grade*> m_grades;
 };
 
